@@ -1,0 +1,53 @@
+// 麵包屑導航
+.tabs {
+  height:6rem;
+  background:rgba(245,246,247,1);
+  display: flex;
+  align-items: center;
+  /deep/ .el-breadcrumb__item {
+    display: flex;
+    align-items: center;
+    font-size:1.6rem;
+    font-weight:400;
+    color:rgba(37,36,39,1)!important;
+    line-height:2.2rem;
+    cursor: pointer;
+  }
+   /deep/ .el-breadcrumb__inner a {
+     font-weight:400;
+      color:rgba(37,36,39,1);
+      font-family:PingFang-SC-Regular,PingFang-SC;
+   }
+  /deep/ .el-breadcrumb__inner a:hover {
+     color:rgba(37,36,39,1);
+  }
+  .checked {
+    /deep/ .el-breadcrumb__inner {
+      width: 16rem;
+      color: #006AFF !important;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+     }
+  }
+  .icon-3 {
+    color: #006AFF;
+    font-size: 1.2rem;
+  }
+}
+@media screen and (max-width:767px) {
+  .tabs {
+    height:3.6rem;
+    padding: 0 1rem;
+    /deep/ .el-breadcrumb__item {
+      font-size:1.4rem;
+    }
+  }
+}
+@media screen and (max-width:414px) {
+  .tabs {
+    /deep/.el-breadcrumb__separator[class*=icon] {
+      margin: 0 .4rem;
+    }
+  }
+}
