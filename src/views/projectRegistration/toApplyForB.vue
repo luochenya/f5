@@ -32,7 +32,14 @@
               <label>
                 <span></span>
                 <div class="name">報備日期</div>
-                <input type="text" placeholder="請填寫日期" v-model="formB.report_date">
+                <!-- <input type="text" placeholder="請填寫日期" v-model="formB.report_date">  -->
+                <el-date-picker
+                  disabled
+                  v-model="formB.report_date"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="請選擇日期">
+                </el-date-picker>
               </label>
             </div>
             <div class="card">
@@ -62,16 +69,16 @@
             </el-select>
           </div>
           <div class="card">
-            <p>代理商業務</p>
-            <el-select v-model="formB.agent_business"  placeholder="請選擇"  @change="oegionChangeB(formB.agent_business)">
-              <el-option v-for="(item,index) in  oegionListB" :label="item.qz_name" :value="item" :key="index"></el-option>
+            <p>代理商產品經理</p>
+            <el-select v-model="formB.agent_business" value-key="qz_name" placeholder="請選擇"  @change="oegionChangeB(formB.agent_business)">
+              <el-option v-for="(item,index) in oegionListB" :label="item.qz_name" :value="item" :key="index"></el-option>
             </el-select>
           </div>
         </div>
       </div>
       <div class="btn">
-        <a href="javascript:;" @click="$emit('prev')">上一步</a>
-        <a href="javascript:;" class="btnColor" @click="next">下一步</a>
+        <a @click="$emit('prev')">上一步</a>
+        <a class="btnColor" @click="next">下一步</a>
       </div>
     </div>
   </div>
@@ -88,7 +95,7 @@ export default {
         dealer_company_name: '',
         business_email: '',
         business_name: '',
-        report_date: '',
+        report_date: this.getNowTime(),
         rank: '',
         mobile: '',
         agent_company: [],
@@ -105,9 +112,22 @@ export default {
     // this.formB = storage.getItem('formB') || {}
   },
   methods: {
+    //处理默认选中当前日期
+	    getNowTime() {
+	       var now = new Date();
+	       var year = now.getFullYear(); //得到年份
+	       var month = now.getMonth(); //得到月份
+	       var date = now.getDate(); //得到日期
+	      //  var hour =" 00:00:00"; //默认时分秒 如果传给后台的格式为年月日时分秒，就需要加这个，如若不需要，此行可忽略
+	       month = month + 1;
+	       month = month.toString().padStart(2, "0");
+	       date = date.toString().padStart(2, "0");
+	       var defaultDate = `${year}-${month}-${date}`;
+	       return defaultDate;
+	       this.$set(this.formB, "report_date", defaultDate);
+	    },
     _getAgentPersonal () {
       getAgentPersonal({ headers: { token: this.token } }).then(res => {
-        console.log(res)
         if (res.data.code !== '200') {
           this.$message.error('獲取數據失敗！')
         } else {
@@ -116,7 +136,6 @@ export default {
       })
     },
     oegionChange (item) {
-      console.log(item, 'b')
       this.formB.agent_business = ''
       // const list = this.oegionListA.filter(i => {
       //   return i.id === item
@@ -125,9 +144,7 @@ export default {
       this.agent_companyId = item.id
     },
     oegionChangeB (item) {
-      console.log(item)
       this.agent_businessId = item.qz_id
-      console.log(this.agent_companyId, this.agent_businessId)
     },
     next (type) {
       const { formB } = this
@@ -146,8 +163,10 @@ export default {
         errMsg = '請填寫職稱!'
       } else if (!formB.mobile) {
         errMsg = '請填寫電話號碼!'
-      } else if (!/^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(formB.mobile)) {
-        errMsg = '請填寫正確電話號碼!'
+      // } else if (!/^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(formB.mobile)) {
+      //   errMsg = '請填寫正確電話號碼!'
+      } else if (formB.agent_company && !formB.agent_business) {
+        errMsg = '代理商產品經理不能為空!'
       }
       if (errMsg) {
         this.$message.error(errMsg)
@@ -164,7 +183,7 @@ export default {
 }
 </script>
 
-<style scoped lang='scss'>
+<style lang='scss'>
 @import './../../assets/style/mixin.scss';
 .to-apply-for-b {
   .main {
@@ -252,6 +271,28 @@ export default {
                 color:rgba(189,189,189,1);
                 line-height:2.2rem;
               }
+              .el-input__inner {
+                border: none;
+                outline: none;
+                background:rgba(245,246,247,1);
+                font-size:1.6rem;
+                font-weight:400;
+                color:#BDBDBD;
+                line-height:2.2rem;
+                padding: 0;
+              }
+              input::-webkit-input-placeholder {
+                color:#bdbdbd;
+              }
+              input::-moz-input-placeholder {
+                color:#bdbdbd;
+              }
+              input::-ms-input-placeholder {
+                color:#bdbdbd;
+              }
+              .el-input__prefix, .el-input__suffix {
+                display: none;
+              }
             }
           }
         }
@@ -289,7 +330,7 @@ export default {
             line-height:2.2rem;
           }
           .el-select {
-            width: 80%;
+            width: 70%;
           }
           /deep/.el-input__inner {
             border: none;

@@ -3,7 +3,21 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="goHome">首页</a></el-breadcrumb-item>
+          <el-breadcrumb-item>
+            <a v-if="this.$route.query.newsId == 6" @click="goNext()">首頁</a>
+            <a v-if="this.$route.query.newsId == 4" @click="goNext()">經銷商專區</a>
+            <a v-if="this.$route.query.newsId == 2 || this.$route.query.newsId == 3 || this.$route.query.newsId == 1" >代理商專區</a> <!-- @click="goNext()" -->
+            <a v-if="this.$route.query.newsId == 0" @click="goNext()">F5專區</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.newsId == 2">
+            <a @click="goNext()">逸盈科技NETFOS</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.newsId == 3">
+            <a @click="goNext()">零壹科技ZERONE</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.newsId == 1">
+            <a @click="goNext()">創泓科技Uniforce</a>
+          </el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -22,18 +36,18 @@
             <div class="item-text">
               <div class="name">
                 <h1>{{item.title}}</h1>
-                <span>創建於 {{item.created_at | dateFormat}}</span>
+                <span>創建於 {{item.created_at}}</span>
               </div>
               <div class="text" v-html="item.content"></div>
               <div class="user">
                 <div class="user-img">
                   <div class="img">
-                    <img src="./../../../assets/imgs/safety-user.png" alt="">
+                    <img src="./../../../assets/imgs/head-portrait.svg" alt="">
                   </div>
-                  <span>發表人：郭子君</span>
+                  <span>發表人：{{ item.uploader ? item.uploader : item.nick_name }}</span>
                 </div>
                 <div class="tip">
-                  <i class="icon-6"></i>查看234235
+                  <!-- <i class="icon-6"></i>查看234235 -->
                 </div>
             </div>
             </div>
@@ -46,7 +60,7 @@
             <div class="item-text">
               <div class="name">
                 <h1>{{item.title}}</h1>
-                <span>創建於 {{item.created_at | dateFormat}}</span>
+                <span>創建於 {{item.created_at}}</span>
               </div>
               <div class="img-text">
                 <div class="item-img">
@@ -57,12 +71,12 @@
               <div class="user">
                 <div class="user-img">
                   <div class="img">
-                    <img src="./../../../assets/imgs/safety-user.png" alt="">
+                    <img src="./../../../assets/imgs/head-portrait.svg" alt="">
                   </div>
-                  <span>發表人：郭子君</span>
+                  <span>發表人：{{ item.uploader ? item.uploader : item.nick_name }}</span>
                 </div>
                 <div class="tip">
-                  <i class="icon-6"></i>查看234235
+                  <!-- <i class="icon-6"></i>查看234235 -->
                 </div>
             </div>
             </div>
@@ -85,7 +99,7 @@
 
 <script>
 import Pagination from './../../../components/Pagination'
-import { systemFeaturedArticles } from './../../../api/request'
+import { systemFeaturedArticles, featuredArticlesWeb } from './../../../api/request'
 export default {
   components: {
     Pagination
@@ -106,25 +120,69 @@ export default {
     this._systemFeaturedArticles()
   },
   methods: {
+    goNext () {
+      if (this.newsId === 6 || this.newsId === '6') {
+        this.$router.push({ path: '/pushInformation' })
+      } else if (this.newsId === 0 || this.newsId === '0') {
+        this.$router.push({ path: '/pushInformation', query: { f5: this.newsId } })
+      } else if (this.newsId == '1' || this.newsId == '3' || this.newsId == '2') {
+        this.$router.push({ path: '/pushInformation', query: { agencyId: this.newsId } })
+      } else if (this.newsId === 4 || this.newsId === '4') {
+        this.$router.push({ path: '/pushInformation', query: { dealers: this.newsId } })
+      }
+    },
     _systemFeaturedArticles () {
-      const { offset, limit } = this
-      systemFeaturedArticles({ offset, limit }, { headers: { token: this.token } }).then(res => {
-        console.log(res)
-        if (res.data.code !== '200') {
-          this.$message.error('獲取數據失敗！')
-        } else {
-          this.newsList = res.data.data.rows
-          this.total = res.data.data.total
+      var types = ''
+      if (this.newsId == 6) {
+        var form = {
+          offset: this.offset * this.limit,
+          limit: this.limit
         }
-        this.isShowLoading = false
-      })
+        systemFeaturedArticles(form, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
+          if (res.data.code !== '200') {
+            this.$message.error('獲取數據失敗！')
+          } else {
+            this.newsList = res.data.data.rows
+            this.total = res.data.data.total
+          }
+        })
+      } else {
+        if (this.newsId == 0) {
+          types = 1
+        } else if (this.newsId == 4) {
+          types = 2
+        } else if (this.newsId == 3) {
+          types = 3
+        } else if (this.newsId == 2) {
+          types = 4
+        } else if (this.newsId == 1) {
+          types = 5
+        }
+        var form = {
+          type: types,
+          offset: this.offset * this.limit,
+          limit: this.limit
+        }
+        featuredArticlesWeb(form, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
+          if (res.data.code !== '200') {
+            this.$message.error('獲取數據失敗！')
+          } else {
+            this.newsList = res.data.data.rows
+            this.total = res.data.data.total
+          }
+        })
+      }
     },
     handleCurrentChange (e) {
       if (e === 1) {
         this.offset = 0
       } else {
-        this.offset = (e - 1) * this.limit
+        // // this.offset = (e - 1) * this.limit
+        this.offset = e - 1
       }
+      window,scrollTo(0,0)
       this.isShowLoading = true
       this._systemFeaturedArticles()
     },
@@ -132,13 +190,13 @@ export default {
       this.$router.push({ path: '/articlesDetails', query: { name: this.newsId, article_id: id } })
     },
     goHome () {
-      // 首页
+      // 首頁
       if (this.newsId === 6 || this.newsId === '6') {
         this.$router.push('/')
       } else if (this.newsId === 0 || this.newsId === '0') {
         // f5
         this.$router.push({ path: '/pushInformation', query: { f5: 0 } })
-      } else if (this.newsId === 3 || this.newsId === '3' || this.newsId === 2 || this.newsId === '2') {
+      } else if (this.newsId == '22' || this.newsId == '3' || this.newsId == '2') {
         // 代理
         this.$router.push({ path: '/pushInformation', query: { agencyId: this.newsId } })
       } else if (this.newsId === 4 || this.newsId === '4') {
@@ -222,7 +280,7 @@ export default {
           width: 20.4rem;
           height: 15rem;
           border-radius: 1rem;
-          overflow: hidden;
+          // overflow: hidden;
           img {
             width: 100%;
             height: 100%;
@@ -230,7 +288,7 @@ export default {
         }
         .item-text {
           margin-left: 3.6rem;
-          width: 100%;
+          width: calc(100% - 24rem);
           .name {
             @include flex();
             h1 {
@@ -238,8 +296,14 @@ export default {
               font-weight:600;
               color:rgba(37,36,39,1);
               line-height:4rem;
+              overflow: hidden;
+              text-overflow:ellipsis;
+              white-space: nowrap;
+              width: 80%;
+              display: inline-block;
             }
             span {
+              text-align: right;
               font-size:1.4rem;
               font-weight:400;
               color:rgba(189,189,189,1);
@@ -253,6 +317,11 @@ export default {
             font-weight:400;
             color:rgba(134,134,134,1);
             line-height:2.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
           }
           .user {
             margin-top: 2rem;
@@ -377,6 +446,7 @@ export default {
           border-bottom: .1rem solid rgba(240,240,240,1);
           .item-text {
             margin-left: 0;
+            width: 100%;
             .name {
               flex-direction: column;
               @include flex(center,flex-start);

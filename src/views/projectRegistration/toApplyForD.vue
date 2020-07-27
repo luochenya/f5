@@ -7,7 +7,7 @@
             <div class="top"><h1>填寫資料確認</h1><div class="num"><span>4</span>/4</div></div>
             <div class="link"><div class="links"></div></div>
              <h2>A.客戶及專案資訊</h2>
-             <p>客戶信息</p>
+             <p>客戶訊息</p>
              <div class="card-box" v-if="formA">
                 <div class="card">
                   <span></span>
@@ -34,8 +34,13 @@
                   <div class="name">承辦人</div>
                   <div class="text">{{formA.undertaker}}</div>
                 </div>
+                <div class="card">
+                  <span></span>
+                  <div class="name">承辦人電話(M)</div>
+                  <div class="text">{{formA.unker_phone[1]}}</div>
+                </div>
              </div>
-             <p>客戶信息</p>
+             <p>客戶訊息</p>
              <div class="card-box">
                 <div class="card">
                   <span></span>
@@ -67,6 +72,16 @@
                   <div class="name">承辦人E-mail</div>
                   <div class="text">{{formA.unker_email}}</div>
                 </div>
+                <div class="card">
+                  <span></span>
+                  <div class="name">競爭廠商(原廠)</div>
+                  <div class="text">{{formA.comp_manu_original}}</div>
+                </div>
+                <div class="card">
+                  <span></span>
+                  <div class="name">競爭廠商(經銷商)</div>
+                  <div class="text">{{formA.comp_manu_dealer}}</div>
+                </div>
              </div>
              <div class="link"></div>
             <h2 class="main-b-title">B.產品方案資訊</h2>
@@ -75,15 +90,15 @@
               <div class="card-box">
                 <div class="card">
                   <div class="name">產品</div>
-                  <div class="text">{{item.product_type_name}}</div>
+                  <div class="text">{{item.product_type}}</div>
                 </div>
                 <div class="card">
                   <div class="name">數量</div>
-                  <div class="text">{{item.product_type_mum}}</div>
+                  <div class="text">{{item.product_type_num}}</div>
                 </div>
               </div>
               <div class="title"><span></span>產品模組</div>
-              <p v-for="(items,i) in item.project_module" :key="i">{{items.module_name}}</p>
+              <p v-for="(items,i) in item.product_module" :key="i">{{items.module_name}}</p>
             </div>
             <div class="link"></div>
             <h2>C.經銷商資訊</h2>
@@ -125,7 +140,7 @@
             <div class="card-box-d">
               <div class="card">
                 <div class="name" >代理商公司</div>
-                <el-select v-if="formB.agent_company" v-model="formB.agent_company.name" placeholder="二三科技有限公司" disabled>
+                <el-select v-if="formB.agent_company" v-model="formB.agent_company.name" placeholder="" disabled>
                   <!-- <el-option
                     label="A"
                     value="B">
@@ -133,8 +148,8 @@
                 </el-select>
               </div>
               <div class="card">
-                <div class="name">代理商業務</div>
-                <el-select v-if="formB.agent_business" v-model="formB.agent_business.qz_name" placeholder="陳二"  disabled>
+                <div class="name">代理商產品經理</div>
+                <el-select v-if="formB.agent_business" v-model="formB.agent_business.qz_name" placeholder=""  disabled>
                   <!-- <el-option
                     label="A"
                     value="B">
@@ -147,38 +162,38 @@
               <div class="card-item" v-if="formC.projectThat">
                 <div class="card">
                   <div class="title">1.已向客戶進行方案簡報?</div>
-                  <div class="card-d">{{formC.projectThat[0]}}</div>
+                  <div class="card-d">{{formC.projectThat[0] ? formC.projectThat[0] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">2.已提供/建議 產品 or 方案給客戶?</div>
-                  <div class="card-d">{{formC.projectThat[1]}}</div>
+                  <div class="card-d">{{formC.projectThat[1] ? formC.projectThat[1] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">3.須進行PoC驗證?</div>
-                  <div class="card-d">{{formC.projectThat[2]}}</div>
+                  <div class="card-d">{{formC.projectThat[2] ? formC.projectThat[2] : 'NONE'}}</div>
                 </div>
                 <div class="card">
-                  <div class="title">4.預估進行PoC之日常?</div>
-                  <div class="card-d">{{formC.projectThat[3]}}</div>
+                  <div class="title">4.預估進行PoC之日期?</div>
+                  <div class="card-d">{{formC.projectThat[3] ? formC.projectThat[3] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">5.是否需要開立原廠保固授權說明?</div>
-                  <div class="card-d">{{formC.projectThat[4]}}</div>
+                  <div class="card-d">{{formC.projectThat[4] ? formC.projectThat[4] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">6.決標方式? (價格標/評選標/資格標.....等)</div>
-                  <div class="card-d">{{formC.projectThat[5]}}</div>
+                  <div class="card-d">{{formC.projectThat[5] ? formC.projectThat[5] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">7.競爭對手狀態說明</div>
-                  <div class="card-d">{{formC.projectThat[6]}}</div>
+                  <div class="card-d">{{formC.projectThat[6] ? formC.projectThat[6] : 'NONE'}}</div>
                 </div>
               </div>
             </div>
             <div class="card-box-f">
               <h2>F.需要F5支援項目</h2>
               <div class="text">
-               {{formC.five_support_project}}
+               {{formC.five_support_project ? formC.five_support_project : 'NONE'}}
             </div>
             <div class="bottom-b">
               <div class="btn" @click="$emit('prev')">上一步</div>
@@ -229,16 +244,11 @@ export default {
       isShowLoading: false
     }
   },
-  mounted () {
-    console.log(this.formA, '122')
-    console.log(this.formB, '2')
-    console.log(this.formC, '3')
-  },
   methods: {
     successModal () {
       this.isShowLoading = true
       // eslint-disable-next-line camelcase
-      const { client_name, project_name, organizer, unker_phone, undertaker, exp_close_quarter, exp_close_month, total_budget, five_budget, industry, unker_email, comp_manu_origina, comp_manu_dealer, product_programs } = this.formA
+      const { client_name, project_name, organizer, unker_phone, undertaker, exp_close_quarter, exp_close_month, total_budget, five_budget, industry, unker_email, comp_manu_original, comp_manu_dealer, product_programs } = this.formA
       // eslint-disable-next-line camelcase
       const { dealer_company_name, business_email, business_name, report_date, rank, mobile, agent_companyId, agent_businessId } = this.formB
       // eslint-disable-next-line camelcase
@@ -249,7 +259,6 @@ export default {
       })
 
       // this.projectThat = JSON.stringify(projectThatArr)
-      console.log(JSON.stringify(projectThatArr))
       const form = {
         client_name,
         project_name,
@@ -262,7 +271,7 @@ export default {
         five_budget,
         industry,
         unker_email,
-        comp_manu_origina,
+        comp_manu_original,
         comp_manu_dealer,
         product_program: JSON.stringify(product_programs),
         dealer_company_name,
@@ -276,13 +285,11 @@ export default {
         project_config_progress_that: JSON.stringify(projectThatArr),
         five_support_project
       }
-      console.log(form, 'f')
       setApplyProject(form, { headers: { token: this.token } }).then(res => {
-        if (res.data.code !== '200') {
           this.isShowLoading = false
+        if (res.data.code !== '200') {
           this.$message.error('提交失敗！')
         } else {
-          this.isShowLoading = false
           this.isShowModal = true
         }
 
@@ -290,13 +297,10 @@ export default {
       })
     },
     submit () {
-      // this.textValue
-      // console.log(this.textValue)
-
       this.isShowModal = false
+      this.$router.push({path:'/projectRegistration'})
     },
     submitSuccess () {
-      console.log(this.selectValue)
       this.isShowModalSuccess = false
     }
   }
@@ -406,7 +410,7 @@ export default {
           }
           .name {
             margin-left: .9rem;
-            width:11.2rem;
+            width:12.2rem;
             height:2.2rem;
             font-size:1.6rem;
             font-weight:400;
@@ -520,7 +524,7 @@ export default {
               margin-bottom: 1rem;
             }
             .card-d {
-              padding: 1.4rem 4.6rem 2.2rem 3rem;
+              padding: 1.4rem 4.6rem 1.4rem 3rem;
               background:rgba(245,246,247,1);
               border-radius:.4rem;
               border:.1rem solid rgba(239,239,239,1);

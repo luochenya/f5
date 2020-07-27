@@ -9,37 +9,40 @@
     <div class="children" v-show="!$route.meta.showNavBar">
       <div class="user">
         <div class="item-img">
-          <img src="./../assets/imgs/user-max.png" alt="">
+          <img v-if="userInfo &&userInfo.user_head" :src="`${path}${userInfo&& userInfo.user_head}`" alt="">
+          <img v-else src="./../assets/imgs/head-portrait.svg" alt="">
         </div>
         <div class="text">
           <p>Hi~</p>
-          <p>Aurora</p>
+          <p>{{userInfo&&userInfo.nick_name}}</p>
         </div>
-        <span><i>66</i></span>
+        <span @click="$router.push('notificationCenter')">
+          <i>66</i>
+        </span>
       </div>
       <div class="menu-box">
         <ul>
-          <li><a href="javascrpt:;" @click="$router.push('/memberCenter')">會員中心</a></li>
-          <li><a href="javascrpt:;" @click="$router.push({path:'/publishedAnArticle'})">發表文章</a></li>
-          <li><a href="javascrpt:;">點數記錄</a></li>
-          <li><a href="javascrpt:;">專案註冊</a></li>
-          <li><a href="javascrpt:;">專案審核</a></li>
-          <li><a href="javascrpt:;" @click="$emit('goOut')">登出</a></li>
+          <li><a @click="$router.push('/memberCenter');$emit('isShows')">會員中心</a></li>
+          <li><a @click="toMyPublishedArticles();$emit('isShows')">發表文章</a></li>
+          <li><a @click="toPointsRecord();$emit('isShows')">點數記錄</a></li>
+          <li><a @click="toProjectRegistration();$emit('isShows')">專案註冊</a></li>
+          <li><a @click="toProjectReview();$emit('isShows')">專案審核</a></li>
+          <li><a @click="$emit('goOut')">登出</a></li>
         </ul>
         <div class="menu-r">
           <ul>
-            <li><a href="javascript:;">F5專區</a></li>
+            <li><a @click="gotoIndex('4');$emit('isShows')">F5專區</a></li>
             <li @click="isShowUl= !isShowUl">
-              <a href="javascript:;">代理商專區<i class="icon-4" :class="{'item-icon':isShowUl}"></i></a>
+              <a>代理商專區<i class="icon-4" :class="{'item-icon':isShowUl}"></i></a>
               <ul :class="{'checked':isShowUl}">
-                <li><a href="javascript:;">零壹科技ZERONE</a></li>
-                <li><a href="javascript:;">逸盈科技NETFOS</a></li>
-                <li><a href="javascript:;">C代理商</a></li>
+                <li><a @click="gotoIndex('1');$emit('isShows')">零壹科技ZERONE</a></li>
+                <li><a @click="gotoIndex('2');$emit('isShows')">逸盈科技NETFOS</a></li>
+                <li><a @click="gotoIndex('22');$emit('isShows')">創泓科技Uniforce</a></li>
               </ul>
             </li>
-            <li><a href="javascript:;">經銷商專區</a></li>
-            <li><a href="javascript:;"  @click="$emit('gotoDownloads')">下載專區</a></li>
-            <li><a href="javascript:;">點數商城</a></li>
+            <li><a @click="gotoIndex('3');$emit('isShows')">經銷商專區</a></li>
+            <li><a  @click="$emit('gotoDownloads')">下載專區</a></li>
+            <li><a @click="gotoPointsMall();$emit('isShows')">點數商城</a></li>
           </ul>
           <div class="btn" v-show="$route.meta.showNavBar"  @click="$emit('gotoRegisterMember')">加入會員</div>
         </div>
@@ -51,11 +54,170 @@
 </template>
 
 <script>
+import storage from '@/storage'
+import { accountLogout, getUserInfo, getJurisdiction } from './../api/request'
 export default {
+  inject: ['reload'],
   data () {
     return {
-      isShowUl: false
+      isShowUl: false,
+      showModal: false,
+      isShow: false,
+      token: '',
+      userInfo: {},
+      isShowLoading: false,
+      path: this.imgs,
+      paths: '',
+      Jurisdiction: {}
     }
+  },
+  mounted () {
+    this.paths = this.$route.path
+    // const paths = this.$route.path
+    this.token = window.sessionStorage.getItem('token')
+    if (this.$route.path != "/login" && this.$route.path !== '/register' && this.$route.path != "/forgetPassword" && this.$route.path != "/reset") {
+      this._getUserInfo()
+      this._getJurisdiction()
+      this.$nextTick(() => {
+        this._getUserInfo()
+        this._getJurisdiction()
+      })
+    }
+  },
+  methods: {
+    gotoPointsMall () {
+      this.$router.push('/PointsMall')
+    },
+    titleCilck() {
+      if (this.$route.path !== '/login' && this.$route.path !== '/register') {
+        // this.$message.warning("功能尚未啟用")
+        this.$message({
+          message: '功能尚未啟用',
+          type: 'warning',
+          duration: 1000
+        });
+      }
+    },
+    // 跳轉專案審核
+    toProjectReview () {
+      if (this.Jurisdiction.project_review == 1) {
+        this.$router.push({path:'/projectReview'})
+      } else {
+        this.$message.error("暫無權限")
+      }
+    },
+    // 跳轉專案註冊
+    toProjectRegistration () {
+      if (this.Jurisdiction.project_reg == 1) {
+        this.$router.push({path:'/projectRegistration'})
+      } else {
+        this.$message.error("暫無權限")
+      }
+    },
+    // 跳轉發佈文章
+    toMyPublishedArticles () {
+      if (this.Jurisdiction.publications == 1) {
+        this.$router.push({path:'/myPublishedArticles'})
+      } else {
+        this.$message.error("暫無權限")
+      }
+    },
+    // 跳轉點數記錄
+    toPointsRecord () {
+      this.$router.push({path:'/PointsRecord'})
+    },
+    // 獲取會員權限
+    _getJurisdiction () {
+      getJurisdiction({ headers: { token: this.token } }).then(res => {
+        // console.log(res)
+        if (res.data.code == '200') {
+          this.Jurisdiction = res.data.data
+        } else {
+          // this.$message.error("會員權限獲取失敗")
+        }
+      })
+    },
+    // 獲取個人信息
+    _getUserInfo () {
+      this.isShowLoading = true
+      getUserInfo({ headers: { token: this.token } }).then(res => {
+        this.isShowLoading = false
+        if (res.data.code === '200') {
+          // console.log(res)
+          this.userInfo = res.data.data || storage.getItem('userInfo')
+          storage.setItem('userInfo', res.data.data)
+        }
+      })
+    },
+    goOut () {
+      this.isShow = false
+      this.showModal = true
+      this.noScroll()
+    },
+    gotoGogin () {
+      this.showModal = false
+      this.canScroll()
+      accountLogout({ headers: { token: this.token } }).then(res => {
+        // console.log(res)
+        if (res.data.code !== '200') {
+          window.sessionStorage.removeItem('f5')
+          window.sessionStorage.removeItem('token')
+          // window.sessionStorage.clear()
+          this.$router.push('/login')
+        } else {
+          window.sessionStorage.removeItem('f5')
+          window.sessionStorage.removeItem('token')
+          // window.sessionStorage.clear()
+          this.$router.push('/login')
+        }
+      })
+      window.sessionStorage.removeItem('f5')
+      window.sessionStorage.removeItem('token')
+      // window.sessionStorage.clear()
+      this.$router.push('/login')
+    },
+    // 頂部路由跳轉
+    gotoIndex (type) {
+      if (type === '1') {
+        if (this.Jurisdiction.agent == 1) {
+          this.$router.push({ path: '/pushInformation', query: { agencyId: 3 } })
+          this.reload()
+        } else {
+          this.$message.error("暫無權限")
+        }
+      } else if (type === '2') {
+        if (this.Jurisdiction.agent == 1) {
+          this.$router.push({ path: '/pushInformation', query: { agencyId: 2 } })
+          this.reload()
+        } else {
+          this.$message.error("暫無權限")
+        }
+      } else if (type === '22') {
+        if (this.Jurisdiction.agent == 1) {
+          this.$router.push({ path: '/pushInformation', query: { agencyId: 22 } })
+          this.reload()
+        } else {
+          this.$message.error("暫無權限")
+        }
+      } else if (type === '3') {
+        if (this.Jurisdiction.dealer == 1) {
+          this.$router.push({ path: '/pushInformation', query: { dealers: 4 } })
+          this.reload()
+        } else {
+          this.$message.error("暫無權限")
+        }
+      } else if (type === '4') {
+        if (this.Jurisdiction.original == 1) {
+          this.$router.push({ path: '/pushInformation', query: { f5: 0 } })
+          this.reload()
+        } else {
+          this.$message.error("暫無權限")
+        }
+      } else {
+        this.$router.push({ path: '/pushInformation' })
+        this.reload()
+      }
+    },
   }
 }
 </script>

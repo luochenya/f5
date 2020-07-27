@@ -11,9 +11,9 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="$router.push('/')">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">我的</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">專案註冊</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('/')">首頁</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a>我的</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a>專案註冊</a></el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': true}">申請</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -226,7 +226,6 @@ export default {
       this.radio = this.radios[index].value
       // 设置值，以供传递
       this.radios[index].isChecked = true
-      console.log(this.radio)
     },
     nextA (from) {
       this.formA = from
@@ -241,7 +240,6 @@ export default {
       this.formB = from
       this.isShowB = false
 
-      console.log(this.formB, 'b')
       this.isShowC = true
     },
     prevC () {
@@ -253,7 +251,6 @@ export default {
       this.isShowC = false
 
       this.isShowD = true
-      console.log(this.formC, 'c')
     },
     prevD () {
       this.isShowD = false

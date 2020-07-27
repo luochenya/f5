@@ -3,8 +3,11 @@
     <div class="resetas-psword-modal" v-show="showModal">
       <div class="mask"></div>
       <div class="modal-dialog">
+        <div class="modal-dialog-close" @click="$emit('showModalClick')">
+          <i class="el-icon-close"></i>
+        </div>
         <div class="modal-header">
-          <h1>重設密碼</h1>
+          <h1>修改密碼</h1>
           <span>RESETAS PASSWORD</span>
         </div>
         <div class="modal-body">
@@ -20,7 +23,7 @@
               <div class="item-input" :class="{'checked': errStatus8}">
                 <label :prop="prop.password">
                   <span>新密碼</span>
-                  <input type="text" placeholder="密碼必須為長度8至20之英數字組合"  v-model="form.password" @blur.prevent="changeIpt('password')">
+                  <input type="text" placeholder="密碼長度至少6位數"  v-model="form.password" @blur.prevent="changeIpt('password')">
                 </label>
                   <div :class="{'error': errStatus8}"><span></span>{{errMessage8}}</div>
               </div>
@@ -35,8 +38,8 @@
           </form>
         </div>
        <div class="modal-footer">
-          <!-- <a href="javascript:;" class="btn"  @click="$emit('submit')">儲存修改</a> -->
-          <a href="javascript:;" class="btn"  @click="submit">儲存修改</a>
+          <!-- <a class="btn"  @click="$emit('submit')">儲存修改</a> -->
+          <a class="btn"  @click="submit">儲存修改</a>
         </div>
       </div>
 
@@ -74,8 +77,8 @@ export default {
       errStatus9: false,
       rules: {
         password: [{ required: true, message: '請輸入現在的密碼' }],
-        repassword: [{ required: true, message: '請输入新密碼' }, { min: 6, max: 20, message: '長度8至20之英數字組合' }],
-        oldpassword: [{ required: true, message: '請输入確認密碼' }]
+        repassword: [{ required: true, message: '請輸入新密碼' }, { min: 6, message: '密碼長度至少6位數' }],
+        oldpassword: [{ required: true, message: '請輸入確認密碼' }]
       },
       token: ''
     }
@@ -179,7 +182,21 @@ export default {
     flex-direction: column;
     padding: 6rem 0 6.4rem;
     box-sizing: border-box;
-
+    .modal-dialog-close {
+      cursor: pointer;
+      position: absolute;
+      right: -15px;
+      top: -15px;
+      background: rgba(0,0,0,0.5);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 2.2rem;
+      color: #ffffff;
+      font-weight:bold;
+      text-align: center;
+      line-height: 40px;
+    }
     .modal-header {
       text-align: center;
       h1 {
@@ -221,6 +238,7 @@ export default {
             }
             input {
               font-size:1.6rem;
+              width: 250px;
               border:none;
               color:#BDBDBD;
             }
@@ -263,7 +281,7 @@ export default {
   @media screen and (max-width: 636px){
     .modal-dialog {
       width: 100%;
-      @include position(absolute,45%,50%,97%,49.8rem);
+      @include position(absolute,50%,50%,90%,80vh);
       padding: 6rem 1rem 6.4rem;
       .modal-body {
          width: 100%;
@@ -273,12 +291,12 @@ export default {
             width:100%;
             label {
               span {
-                width: 6.6rem;
+                width: 4rem;
                 font-size:1.4rem;
                 margin: 0 1rem 0 1rem;
               }
               input {
-                width: 23rem;
+                width: 19rem;
                 font-size:1.4rem;
               }
             }
@@ -289,6 +307,7 @@ export default {
         width: 100%;
         .btn{
           width:100%;
+          margin: 0;
         }
       }
     }

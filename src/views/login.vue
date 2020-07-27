@@ -15,7 +15,7 @@
         <form :model="form" :rules="rules">
           <div class="item-input">
             <label :prop="prop.account">
-              <div class="name"><span>帳號</span><a href="javascrpt:;" @click="noAccount('account')">忘記帳號</a></div>
+              <div class="name"><span>帳號</span><a @click="noAccount('account')">忘記帳號</a></div>
               <!-- <input type="text" placeholder="請輸入您的帳號" :class="{'checked': isErorr}" v-model="form.account"  @blur.prevent="changeIpt" @input="onInput"> -->
               <input type="text" placeholder="請輸入您的帳號" :class="{'checked': errStatus}" v-model="form.account"  @blur.prevent="changeIpt('user')">
             </label>
@@ -23,10 +23,15 @@
           </div>
           <div class="item-input">
             <label :prop="prop.password">
-              <div class="name"><span>密碼</span><a href="javascrpt:;" @click="noAccount('password')">忘記密碼</a></div>
+              <div class="name"><span>密碼</span><a @click="noAccount('password')">忘記密碼</a></div>
               <input type="password" placeholder="請輸入您的密碼" v-model="form.password" :class="{'checked': errPawStatus}"  @blur.prevent="changeIpt('pws')">
             </label>
             <div class="error" v-show="errPawStatus"><span></span>{{errPawMessage}}</div>
+            <div style="margin-top: 10px">
+              <el-checkbox v-model="checked">記住密碼</el-checkbox>
+            </div>
+          </div>
+          <div>
           </div>
           <div class="item-btn" @click="login(form)">登入</div>
         </form>
@@ -34,27 +39,48 @@
           <span></span><p>or use</p><span></span>
         </div>
         <div class="item-btns">
-          <div class="btn btn-left">
+          <fb-signin-button
+            class="btn btn-left" v-if="facebook_login == '1'"
+            :params="fbSignInParams"
+            @success="onSignInSuccess"
+            @error="onSignInError"
+          >
             <span></span>
             使用Face book登入
-          </div>
-          <div class="btn btn-right">
+          </fb-signin-button>
+          <div class="btn btn-right" v-if="google_login == '1'" v-google-signin-button="clientId">
+          <!-- <div class="btn btn-right" v-google-signin-button="clientId"> -->
             <span></span>
             使用Google登入
           </div>
         </div>
       </div>
     </div>
+    <loading :show="isShowModal"></loading>
   </div>
 </template>
 
 <script>
+import GoogleSignInButton from "vue-google-signin-button-directive";
 import Schema from 'async-validator'
-import { AccountLogin } from './../api/request'
+import { AccountLogin, getThirdLogin, loginThird } from './../api/request'
 export default {
   name: 'login',
+  directives: {
+    GoogleSignInButton
+  },
   data () {
     return {
+      fbSignInParams: {
+        // scope: "email,user_like",
+        return_scopes: true
+      },
+      isShowModal: false,
+      // 根据打包环境调用不同的谷歌clientId
+      clientId: "573960589899-5bv2pugb5dadd28uolf3f1l6g4p9i8na.apps.googleusercontent.com",
+      facebook_login: '',
+      google_login: '',
+      checked: false,
       form: {
         account: '',
         password: ''
@@ -72,18 +98,95 @@ export default {
           {
             required: true,
             message: '請輸入您的帳號'
-          },
-          {
-            min: 6,
-            max: 10,
-            message: '请输入6~10的用户名'
+          // },
+          // {
+          //   min: 6,
+          //   max: 10,
+          //   message: '請輸入6~10的用户名'
           }],
         password: [{ required: true, message: '請輸入您的密碼' }]
       },
       isErorr: false
     }
   },
+  mounted () {
+    this._getThirdLogin()
+    if (window.localStorage.getItem('userName')) {
+      this.form.account = window.localStorage.getItem('userName')
+      this.form.password = window.localStorage.getItem('password')
+      this.checked = true
+    }
+  },
   methods: {
+    // FB登录成功
+    onSignInSuccess(response) {
+      // FB.api('/me', dude => {
+      //   console.log(`Good to see you, ${dude.name}.`)
+      // })
+      console.log(response); //返回第三方的登录信息 tolen等
+      
+      this.isShowModal = true
+      loginThird({ platform_id: response.authResponse.userID, platform: 'facebook', type: 'web' }).then(res => {
+        this.isShowModal = false
+          if (res.data.code != '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error',
+              duration: 1000
+            })
+          } else {
+            this.$message({
+              message: res.data.msg,
+              type: 'success',
+              duration: 1000
+            })
+            window.sessionStorage.setItem('token', res.data.data.token)
+            window.sessionStorage.setItem('verifier_lv', res.data.data.verifier_lv)
+            window.sessionStorage.setItem('user_id', res.data.data.id)
+            this.$router.push('/')
+          }
+        })
+    },
+    // FB登录失败
+    onSignInError(error) {
+      console.log(error)
+    },
+    // 谷歌登录成功
+    OnGoogleAuthSuccess(idToken) {
+      var jwt = require("jsonwebtoken");
+      var form = jwt.decode(idToken);
+      this.isShowModal = true
+      loginThird({ platform_id: form.sub, platform: 'google', type: 'web' }).then(res => {
+        this.isShowModal = false
+          if (res.data.code != '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error',
+              duration: 1000
+            })
+          } else {
+            this.$message({
+              message: res.data.msg,
+              type: 'success',
+              duration: 1000
+            })
+            window.sessionStorage.setItem('token', res.data.data.token)
+            window.sessionStorage.setItem('verifier_lv', res.data.data.verifier_lv)
+            window.sessionStorage.setItem('user_id', res.data.data.id)
+            this.$router.push('/')
+          }
+        })
+    },
+    // 谷歌登录失败
+    OnGoogleAuthFail(error) {
+      console.log(error);
+    },
+    _getThirdLogin() {
+      getThirdLogin().then(res => {
+        this.facebook_login = res.data.data.rows.facebook_login
+        this.google_login = res.data.data.rows.google_login
+      })
+    },
     changeIpt (type) {
       if (type === 'user') {
         this.validator(this.prop.account)
@@ -124,9 +227,25 @@ export default {
       // this.prop.forEach(item => {
       //   console.log(item)
       // })
-      for (const item in this.prop) {
-        this.validator(item)
+      if (!form.account) {
+        this.errMessage = '請輸入您的帳號'
+        this.errStatus = true
+        return false
+      } else {
+        this.errMessage = ''
+        this.errStatus = ''
       }
+      if (!form.password) {
+        this.errPawMessage = '請輸入您的密碼'
+        this.errPawStatus = true
+        return false
+      } else {
+        this.errPawMessage = ''
+        this.errPawStatus = ''
+      }
+      // for (const item in this.prop) {
+      //   this.validator(item)
+      // }
       if (this.form.account && this.form.password && !this.errStatus && !this.errPawStatus) {
         AccountLogin({ account: this.form.account, password: this.form.password, type: 'web' }).then(res => {
           // console.log(res)
@@ -139,9 +258,19 @@ export default {
             this.errStatus = ''
             this.$message({
               message: res.data.msg,
-              type: 'success'
+              type: 'success',
+              duration: 1000
             })
+            if (this.checked) {
+              window.localStorage.setItem('userName', this.form.account)
+              window.localStorage.setItem('password', this.form.password)
+            } else {
+              window.localStorage.removeItem('userName')
+              window.localStorage.removeItem('password')
+            }
             window.sessionStorage.setItem('token', res.data.data.token)
+            window.sessionStorage.setItem('verifier_lv', res.data.data.verifier_lv)
+            window.sessionStorage.setItem('user_id', res.data.data.id)
             this.$router.push('/')
           }
         })
@@ -244,6 +373,7 @@ export default {
       }
 
       .item-btn {
+        margin-top: 2rem;
         width:42rem;
         height:5rem;
         @include flex(center);
@@ -275,7 +405,7 @@ export default {
         .btn {
           width:20rem;
           height:5rem;
-          @include flex(flex-start,center);
+          @include flex(center,center);
           background:rgba(2,100,224,1);
           border-radius:.4rem;
           font-size:1.4rem;

@@ -1,10 +1,11 @@
 <template>
   <div class="home">
-    <nav-header></nav-header>
+    <nav-header v-if="isRouterAlives"></nav-header>
     <router-view v-if="isRouterAlive"></router-view>
-     <nav-footer v-if="$route.meta.showNavBar || $route.meta.showNavBarTow"></nav-footer>
-    <nav-footer-tow v-else></nav-footer-tow>
-
+    <div v-if="this.$route.path !== '/shoppingCart'">
+      <nav-footer v-if="$route.meta.showNavBar || $route.meta.showNavBarTow"></nav-footer>
+      <nav-footer-tow v-else></nav-footer-tow>
+    </div>
   </div>
 </template>
 
@@ -22,12 +23,14 @@ export default {
   },
   provide () {
     return {
-      reload: this.reload
+      reload: this.reload,
+      reloads: this.reloads
     }
   },
   data () {
     return {
-      isRouterAlive: true
+      isRouterAlive: true,
+      isRouterAlives: true
     }
   },
   mounted () {
@@ -39,6 +42,12 @@ export default {
       this.isRouterAlive = false
       this.$nextTick(function () {
         this.isRouterAlive = true
+      })
+    },
+    reloads () {
+      this.isRouterAlives = false
+      this.$nextTick(function () {
+        this.isRouterAlives = true
       })
     }
     // _getUserInfo () {

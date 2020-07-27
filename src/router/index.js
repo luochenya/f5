@@ -24,8 +24,14 @@ const routes = [
         {
           path: '/selectedArticleClassification',
           name: 'selectedArticleClassification',
-          meta: { title: '應用安全' },
+          // meta: { title: '應用安全' },
           component: () => import('./../views/home/components/selectedArticleClassification')
+        },
+        {
+          path: '/selectedArticleClassifications',
+          name: 'selectedArticleClassifications',
+          // meta: { title: '應用安全' },
+          component: () => import('./../views/home/components/selectedArticleClassifications')
         },
         {
           path: '/theLatestNews', // 最新消息
@@ -51,7 +57,7 @@ const routes = [
           component: () => import('./../views/home/components/articlesDetails')
         },
         {
-          path: '/selectedArticleDetails/:id', // 精選文章詳情
+          path: '/selectedArticleDetails', // 精選文章詳情
           name: 'selectedArticleDetails',
           component: () => import('./../views/home/components/selectedArticleDetails')
         }
@@ -88,6 +94,18 @@ const routes = [
         component: () => import('./../views/downloads')
       },
       {
+        path: '/PointsMall', // 點數商城
+        name: 'PointsMall',
+        meta: { title: '點數商城'},
+        component: () => import('./../views/PointsMall/PointsMall')
+      },
+      {
+        path: '/PointsMallDetails', // 商品詳情
+        name: 'PointsMallDetails',
+        meta: { title: '商品詳情', showNavBarTow: true },
+        component: () => import('./../views/PointsMall/PointsMallDetails')
+      },
+      {
         path: '/memberCenter', // 會員中心
         name: 'memberCenter',
         component: () => import('./../views/memberCenter')
@@ -116,25 +134,25 @@ const routes = [
         component: () => import('./../views/projectReviewDetails')
       },
       {
-        path: '/projectRegistration', // 專案注册
+        path: '/projectRegistration', // 專案註冊
         name: 'projectRegistration',
-        meta: { title: '專案注册', showNavBarTow: true },
+        meta: { title: '專案註冊', showNavBarTow: true },
         component: () => import('./../views/projectRegistration')
       },
       {
-        path: '/historyRegistration', // 專案注册歷程記錄
+        path: '/historyRegistration', // 專案註冊歷程記錄
         name: 'historyRegistration',
         meta: { title: '歷程記錄', showNavBarTow: true },
         component: () => import('./../views/projectRegistration/historyRegistration')
       },
       {
-        path: '/projectReviewDetail', // 專案注册详情
+        path: '/projectReviewDetail', // 專案註冊详情
         name: 'projectReviewDetail',
         meta: { title: '詳細資料', showNavBarTow: true },
         component: () => import('./../views/projectRegistration/projectReviewDetail')
       },
       {
-        path: '/projectApplication', // 專案注册申請
+        path: '/projectApplication', // 專案註冊申請
         name: 'projectApplication',
         meta: { title: '申請', showNavBarTow: true },
         component: () => import('./../views/projectRegistration/projectApplication')
@@ -169,6 +187,54 @@ const routes = [
         name: 'publishedAnArticle',
         meta: { title: '發表文章', showNavBarTow: true },
         component: () => import('./../views/publishedAnArticle')
+      },
+      {
+        path: '/notificationCenter', // 通知中心
+        name: 'notificationCenter',
+        meta: { title: '通知中心', showNavBarTow: true },
+        component: () => import('./../views/notificationCenter/notificationCenter')
+      },
+      {
+        path: '/PointsApplication', // 點數申請
+        name: 'PointsApplication',
+        meta: { title: '點數申請', showNavBarTow: true },
+        component: () => import('./../views/PointsApplication/PointsApplication')
+      },
+      {
+        path: '/CreditApplication', // 點數申請
+        name: 'CreditApplication',
+        meta: { title: '點數申請', showNavBarTow: true },
+        component: () => import('./../views/PointsApplication/CreditApplication')
+      },
+      {
+        path: '/PointsDetails', // 點數詳情
+        name: 'PointsDetails',
+        meta: { title: '點數詳情', showNavBarTow: true },
+        component: () => import('./../views/PointsApplication/PointsDetails')
+      },
+      {
+        path: '/PointsRecord', // 點數記錄
+        name: 'PointsRecord',
+        meta: { title: '點數記錄', showNavBarTow: true },
+        component: () => import('./../views/PointsApplication/PointsRecord')
+      },
+      {
+        path: '/MallOrder', // 商城訂單
+        name: 'MallOrder',
+        meta: { title: '商城訂單', showNavBarTow: true },
+        component: () => import('./../views/PointsMall/MallOrder')
+      },
+      {
+        path: '/orderDetails', // 訂單詳情
+        name: 'orderDetails',
+        meta: { title: '訂單詳情', showNavBarTow: true },
+        component: () => import('./../views/PointsMall/orderDetails')
+      },
+      {
+        path: '/shoppingCart', // 購物車
+        name: 'shoppingCart',
+        meta: { title: '購物車', showNavBarTow: true },
+        component: () => import('./../views/PointsMall/shoppingCart')
       }
 
     ]

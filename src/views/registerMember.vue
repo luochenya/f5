@@ -3,7 +3,7 @@
     <div class="container">
       <div class="title">
         <h1>註冊會員</h1>
-        <p>已經有帳號了？<a href="javascript:;" @click="$router.push({path:'/login'})">登入</a></p>
+        <p>已經有帳號了？<a @click="$router.push({path:'/login'})">登入</a></p>
       </div>
       <form :model="form" :rules="rules">
         <div class="form-box">
@@ -66,7 +66,7 @@
             <div class="item-input" :class="{'checked': errStatus8}">
               <label :prop="prop.password">
                   <span>密碼</span>
-                  <input type="password" placeholder="長度8至20之英數字組合" v-model="form.password"  @blur.prevent="changeIpt('password')">
+                  <input type="password" placeholder="密碼長度至少6位數" v-model="form.password"  @blur.prevent="changeIpt('password')">
               </label>
                 <div :class="{'error': errStatus8}"><span></span>{{errMessage8}}</div>
             </div>
@@ -154,13 +154,9 @@ export default {
         company_email: [{ required: true, message: '請輸入公司電子郵件' }],
         nick_name: [{ required: true, message: '請輸入姓名' }],
         phone: [{ required: true, message: '請輸入您的電話號碼' }],
-        accounts: [{ required: true, message: '請設定登入帳號' }, {
-          min: 6,
-          max: 10,
-          message: '請設定6至10位數帳號'
-        }],
-        password: [{ required: true, message: '請输入密碼' }, { min: 6, max: 20, message: '長度8至20之英數字組合' }],
-        repassword: [{ required: true, message: '請输入確認密碼' }]
+        accounts: [{ required: true, message: '請設定登入帳號' }],
+        password: [{ required: true, message: '請輸入密碼' }, { min: 6, message: '密碼長度至少6位數' }],
+        repassword: [{ required: true, message: '請輸入確認密碼' }]
       }
     }
   },
@@ -208,7 +204,6 @@ export default {
     },
     gotoHome () {
       AccountRegister(this.form).then(res => {
-        console.log(res)
       })
       this.showModal = false
       this.canScroll()

@@ -12,10 +12,8 @@
             <span></span>
             <p>{{item.title}}</p>
             <div class="line"></div>
-            <div class="text">
-              {{item.content}}
-            </div>
-            <div class="tiem"><span>創建於 {{item.created_at | dateFormat}}</span><span class="radius"><i></i><i></i></span></div>
+            <!-- <div class="text" v-html="item.content"></div> -->
+            <div class="tiem"><span>創建於 {{item.created_at}}</span><span class="radius"><i></i><i></i></span></div>
           </div>
           <!-- <div class="item item-f">
             <span></span>
@@ -45,24 +43,21 @@
           <h1>精選文章</h1>
           <span @click="goArticlesList">查看更多<i class="icon-3"></i></span>
         </div>
-        <div class="content">
+        <div class="content" v-if="articlesList.id">
           <div class="img-left">
-            <img :src="`${imgs}${articlesList.imgs[0]}`" alt="" v-if="articlesList.imgs &&articlesList.imgs.length>0">
-            <img :src="`${imgs}${articlesList.imgs}`" alt="" v-else>
-
+            <!-- <img :src="`${imgs}${articlesList.imgs[0]}`" alt="" v-if="articlesList.imgs && articlesList.imgs.length > 0 && articlesList.imgs[0]"> -->
+            <img :src="`${imgs}${articlesList.imgs}`" alt="">
           </div>
           <div class="text-right">
-            <h3>{{articlesList.title}}</h3>
+            <h3 class="text-right_title">{{articlesList.title}}</h3>
             <div class="tip">
               <div class="item-left">
                 <!-- <span>F5原廠</span>
                 <span>精選文章</span> -->
               </div>
-              <div class="item-right">創建於 {{articlesList.created_at | dateFormat}}</div>
+              <div class="item-right">創建於 {{articlesList.created_at}}</div>
             </div>
-            <div class="text" v-html="articlesList.content">
-
-            </div>
+            <div class="text" v-html="articlesList.content"></div>
             <div class="btn" @click="goArticlesDetails(articlesList.id)">
               查看全部內容
             </div>
@@ -76,7 +71,7 @@
 
 <script>
 import HomeArticleClassify from './HomeArticleClassify'
-import { newsFiveNewsList, systemGetArticleClass, getAgentNewsList, getDealerNewsList, getHomePageWeb } from './../../../api/request'
+import { newsFiveNewsList, systemGetArticleClass, getAgentNewsList, getDealerNewsList, getHomePageWeb, getHomeNewsList, featuredArticlesWeb } from './../../../api/request'
 export default {
   components: {
     HomeArticleClassify
@@ -110,7 +105,7 @@ export default {
         this.newsId = this.classify
       } else if (this.dealers) {
         this.newsId = this.dealers
-      } else if (this.f5) {
+      } else if (this.f5 == 0) {
         this.newsId = this.f5
       } else {
         this.newsId = '6'
@@ -129,42 +124,57 @@ export default {
       }
       this.$router.push({ path: '/theLatestNewsDetails', query: { name: this.newsId, news_id: id } })
     },
-    _getAgentNewsList () {
-
-    },
+    // 获取最新消息和精选文章
     getNewsFiveNewsList () {
-      // console.log(this.f5)
       if (this.classify) {
         // 代理商最新消息列表
-        // console.log(this.classify)
+        if (this.classify == '22') this.classify = '1'
         getAgentNewsList({ offset: 0, limit: 3, classify: this.classify }, { headers: { token: this.token } }).then(res => {
-          if (res.data.code === '200') {
-            // this.reload()
-            // console.log(res, '1')
+          if (res.data.code !== '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            })
+          } else {
             this.fiveNewsList = res.data.data.rows
-            console.log(this.fiveNewsList)
+          }
+        })
+        // 获取代理商精选文章
+        let types = ''
+        // 逸盈科技NETFOS
+        if (this.classify === 2 || this.classify === '2') {
+          types = 4
+        } else if (this.classify === 3 || this.classify === '3') {
+          // 零壹科技ZERONE
+          types = 3
+        } else {
+        // 創泓科技Uniforce
+          types = 5
+        }
+        featuredArticlesWeb({ type: types, offset: 0, limit: 1 }, { headers: { token: this.token } }).then(res => {
+          if (res.data.code !== '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            })
+          } else {
+            this.articlesList = res.data.data.rows[0]
           }
         })
       } else if (this.dealers) {
         // 经销商最新消息列表
-        // console.log(this.dealers)
         getDealerNewsList({ offset: 0, limit: 3 }, { headers: { token: this.token } }).then(res => {
-          if (res.data.code === '200') {
+          if (res.data.code !== '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            })
+          } else {
             this.fiveNewsList = res.data.data.rows
-          // console.log(this.fiveNewsList)
           }
         })
-      } else if (this.f5 === '0' || this.f5 === 0) {
-        // f5最新消息列表
-        newsFiveNewsList({ offset: 0, limit: 3 }, { headers: { token: this.token } }).then(res => {
-          // console.log(res, 'f5')
-          if (res.data.code === '200') {
-            this.fiveNewsList = res.data.data.rows
-          // console.log(this.fiveNewsList)
-          }
-        })
-      } else {
-        getHomePageWeb({ headers: { token: this.token } }).then(res => {
+        // 获取经销商精选文章
+        featuredArticlesWeb({ type: 2, offset: 0, limit: 1 }, { headers: { token: this.token } }).then(res => {
           // console.log(res, 12)
           if (res.data.code !== '200') {
             this.$message({
@@ -172,9 +182,64 @@ export default {
               type: 'error'
             })
           } else {
-            this.fiveNewsList = res.data.data.news
+            this.articlesList = res.data.data.rows[0]
+          }
+        })
+      } else if (this.f5 === '0' || this.f5 === 0) {
+        // 获取f5最新消息
+        // newsFiveNewsList({ offset: 0, limit: 3 }, { headers: { token: this.token } }).then(res => {
+        //   if (res.data.code !== '200') {
+        //     this.$message({
+        //       message: res.data.msg,
+        //       type: 'error'
+        //     })
+        //   } else {
+        //     this.fiveNewsList = res.data.data.rows
+        //   }
+        // })
+        // 获取f5最新消息
+        getHomeNewsList({ offset: 0, limit: 3, type: 2 }, { headers: { token: this.token } }).then(res => {
+          if (res.data.code !== '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            })
+          } else {
+            this.fiveNewsList = res.data.data.rows
+          }
+        })
+        // 获取f5精选文章
+        featuredArticlesWeb({ type: 1, offset: 0, limit: 1 }, { headers: { token: this.token } }).then(res => {
+          if (res.data.code !== '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            })
+          } else {
+            this.articlesList = res.data.data.rows[0]
+          }
+        })
+      } else {
+        // 获取首页最新消息
+        getHomeNewsList({ offset: 0, limit: 3, type: 2 }, { headers: { token: this.token } }).then(res => {
+          if (res.data.code !== '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            })
+          } else {
+            this.fiveNewsList = res.data.data.rows
+          }
+        })
+        // 获取首页精选文章
+        getHomePageWeb({ headers: { token: this.token } }).then(res => {
+          if (res.data.code !== '200') {
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            })
+          } else {
             this.articlesList = res.data.data.articles
-            // console.log(this.articlesList, '3')
           }
         })
       }
@@ -189,7 +254,7 @@ export default {
         this.newsId = this.classify
       } else if (this.dealers) {
         this.newsId = this.dealers
-      } else if (this.f5) {
+      } else if (this.f5 == 0) {
         this.newsId = this.f5
       } else {
         this.newsId = '6'
@@ -197,6 +262,9 @@ export default {
       this.$router.push({ path: '/selectedArticlesList', query: { newsId: this.newsId } })
     },
     goArticlesDetails (id) {
+      if(!id) {
+        return false;
+      }
       if (this.classify) {
         this.newsId = this.classify
       } else if (this.dealers) {
@@ -254,7 +322,8 @@ export default {
         }
       }
       .content {
-        @include flex();
+        // @include flex();
+        display: flex;
         margin-top: 3.8rem;
         .item {
           padding: 5.7rem 5rem 0 5rem;
@@ -323,8 +392,9 @@ export default {
           }
         }
         .item:nth-child(2),.item:nth-child(3) {
+          margin-left: 1rem;
           background:rgba(255,255,255,1);
-          box-shadow:0px 25px 60px 0px rgba(245,246,247,1);
+          box-shadow:0px 25px 20px 0px rgba(245,246,247,1);
           >span {
             @include bgImg(3.8rem,4.6rem,'./../../../assets/imgs/icon/books-2.png');
           }
@@ -402,17 +472,21 @@ export default {
         }
       }
       .text-right {
+        padding-left: 2.2rem;
         position: relative;
         width: 52.2rem;
         height: 35rem;
         box-sizing: border-box;
-        h3 {
+        .text-right_title {
           height:3.7rem;
           font-size:2.6rem;
           font-weight:600;
           color:rgba(37,36,39,1);
           line-height:3.7rem;
           margin-bottom: 1.3rem;
+          overflow: hidden;
+          text-overflow:ellipsis;
+          white-space: nowrap;
         }
         .tip {
           @include flex();
@@ -438,15 +512,20 @@ export default {
         }
         .text {
           width:522px;
+          height: 20rem;
           font-size:1.8rem;
           font-weight:400;
           color:rgba(134,134,134,1);
           line-height:3.4rem;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 6;
+          overflow: hidden;
         }
         .btn {
           @include flex(center);
           position: absolute;
-          left: 0;
+          left: 2.2rem;
           bottom: 0;
           width:14.4rem;
           height:5rem;
@@ -493,6 +572,12 @@ export default {
          .btn {
             width:12.4rem;
             height:3.6rem;
+         }
+         .text {
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 5;
+          overflow: hidden;
          }
       }
     }
@@ -541,6 +626,12 @@ export default {
         margin-top: 2rem;
         width: 100%;
         height: 30rem;
+        .text {
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 5;
+          overflow: hidden;
+        }
       }
     }
   }
@@ -566,6 +657,7 @@ export default {
         width:100vw!important;
         height:31rem!important;
         padding: 2.7rem 3rem 0 3rem!important;
+        margin-left: 0 !important;
       }
     }
   }
@@ -590,15 +682,20 @@ export default {
           }
         }
         .text-right {
-          h3 {
+          .text-right_title {
             font-size:1.8rem!important;
           }
           .tip {
             margin-bottom: 1rem;
           }
           .text {
+            height: 200px;
             width: 100%;
             font-size: 1.4rem;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 5;
+            overflow: hidden;
           }
           .btn {
             width:12.4rem;

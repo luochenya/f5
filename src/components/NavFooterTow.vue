@@ -11,18 +11,18 @@
         </div>
         <div class="tip">
           <div class="left-text">
-            <a href="javascript:;">HAVE A QUESTION? </a>
+            <a>HAVE A QUESTION? </a>
             <span>|</span>
-            <a href="javascript:;">Support and Sales ›</a>
+            <a>Support and Sales ›</a>
           </div>
           <div class="right-icon">
-            <a href="javascript:;">FOLLOW US</a>
+            <a>FOLLOW US</a>
             <div class="item-icon">
-              <a href="javascript:;"></a>
-              <a href="javascript:;"></a>
-              <a href="javascript:;"></a>
-              <a href="javascript:;"></a>
-              <a href="javascript:;"></a>
+              <a></a>
+              <a></a>
+              <a></a>
+              <a></a>
+              <a></a>
             </div>
           </div>
         </div>
@@ -46,33 +46,33 @@
           <div class="link-item">
             <div class="title"><span></span>ABOUT F5</div>
             <ul>
-              <li><a href="javascrip:;">Corporate Information</a></li>
-              <li><a href="javascrip:;">Newsroom</a></li>
-              <li><a href="javascrip:;">Investor Relations</a></li>
-              <li><a href="javascrip:;">Careers</a></li>
-              <li><a href="javascrip:;">Contact Information</a></li>
-              <li><a href="javascrip:;">Communication Preferences</a></li>
-              <li><a href="javascrip:;">Product Certifications</a></li>
-              <li><a href="javascrip:;">Diversity & Inclusion</a></li>
+              <li><a >Corporate Information</a></li>
+              <li><a >Newsroom</a></li>
+              <li><a >Investor Relations</a></li>
+              <li><a >Careers</a></li>
+              <li><a >Contact Information</a></li>
+              <li><a >Communication Preferences</a></li>
+              <li><a >Product Certifications</a></li>
+              <li><a >Diversity & Inclusion</a></li>
             </ul>
           </div>
           <div class="link-item link-item-ml">
             <div class="title">EDUCATION</div>
             <ul>
-              <li><a href="javascrip:;">Training</a></li>
-              <li><a href="javascrip:;">Professional Certification</a></li>
-              <li><a href="javascrip:;">LearnF5</a></li>
-              <li><a href="javascrip:;">Free Online Training</a></li>
+              <li><a >Training</a></li>
+              <li><a >Professional Certification</a></li>
+              <li><a >LearnF5</a></li>
+              <li><a >Free Online Training</a></li>
             </ul>
           </div>
           <div class="link-item">
             <div class="title">F5 SITES</div>
             <ul>
-              <li><a href="javascrip:;">F5.com</a></li>
-              <li><a href="javascrip:;">DevCentral</a></li>
-              <li><a href="javascrip:;">Support Portal</a></li>
-              <li><a href="javascrip:;">Partner Central</a></li>
-              <li><a href="javascrip:;">F5 Labs</a></li>
+              <li><a >F5.com</a></li>
+              <li><a >DevCentral</a></li>
+              <li><a >Support Portal</a></li>
+              <li><a >Partner Central</a></li>
+              <li><a >F5 Labs</a></li>
             </ul>
           </div>
         </div>

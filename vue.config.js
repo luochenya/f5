@@ -1,3 +1,4 @@
+const webpack = require('webpack')
 module.exports = {
   publicPath: './',
   outputDir: 'dist',
@@ -46,6 +47,7 @@ module.exports = {
     // port: 8080,
     proxy: {
       '/api': {
+        // target: 'https://www.f5points.com.tw/api',
         target: 'http://f5point.twczw.website/api',
         changeOrigin: true,
         pathRewrite: {
@@ -54,6 +56,17 @@ module.exports = {
       }
     },
     // http://localhost:8080/home/#/login
-    publicPath: '/home'
+    publicPath: '/home',
+    overlay: {
+      warnings: false,
+      errors: false
+    },
+  },
+  lintOnSave: false,
+  chainWebpack: config => {
+		config.plugin('provide').use(webpack.ProvidePlugin, [{
+      'window.Quill': 'quill/dist/quill.js',
+      'Quill': 'quill/dist/quill.js'
+    }]);
   }
 }

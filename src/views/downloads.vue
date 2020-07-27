@@ -3,13 +3,12 @@
     <div class="img-box">
       <swiper ref="mySwiper" :options="swiperOptions" class="isShow">
         <swiper-slide v-for="(item,index) in swiperList" :key="index">
-        <img :src="`${imgs}${item.imgs}`" alt="">
-        <div class="container">
+        <img :src="`${imgs}${item.imgs}`" alt=""> 
+        <!-- <div class="container">
           <div class="text">
-            <!-- <p>DOWNLOADS</p> -->
             <span>下載專區</span>
           </div>
-        </div>
+        </div> -->
         </swiper-slide>
 
         <div class="swiper-pagination" slot="pagination"></div>
@@ -18,7 +17,7 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="$router.push('/')">首页</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('/')">首頁</a></el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -30,13 +29,13 @@
             <h1>下載專區</h1>
             <p>DOWNLOADS</p>
           </div>
-          <!-- <div class="text-right">
+          <div class="text-right">
             <span @click="toClear">清除</span>
-            <div class="btn" @click="theQuery">查詢</div>
-          </div> -->
+            <div class="btn" @click="_getFileList">查詢</div>
+          </div>
         </div>
         <div class="time">
-          <!-- <div class="time-left">
+          <div class="time-left">
             <span>建立時間</span>
             <div class="itme-item">
               <div class="item-l">
@@ -59,7 +58,7 @@
                 <i class="icon-8"></i>
               </div>
             </div>
-          </div> -->
+          </div>
           <div class="right-box">
             <div class="item-l">
               <span>分類</span>
@@ -68,16 +67,16 @@
               </el-select>
             </div>
             <div class="item-l item-r">
-              <span>產品</span>
-              <el-select  placeholder="請選擇產品" v-model="form.oegionB">
+              <span>次分類</span>
+              <el-select  placeholder="請選擇次分類" v-model="form.oegionB">
                   <el-option v-for="(item,index) in  oegionListB" :label="item.name" :value="item.id" :key="index"></el-option>
               </el-select>
             </div>
           </div>
-          <div class="itme-item btn-box">
+          <!-- <div class="itme-item btn-box">
             <div class="item-l btn" @click="toClear">清除</div>
             <div class="item-l btn btn-l" @click="theQuery">查詢</div>
-          </div>
+          </div> -->
         </div>
         <div class="table-box">
           <div class="table-hade">
@@ -85,7 +84,7 @@
               <ul>
                 <li class="mc-2">檔案名稱</li>
                 <li class="mc-1">分類</li>
-                <li class="mc-1">產品</li>
+                <li class="mc-1">次分類</li>
                 <li class="mc-1">檔案大小</li>
               </ul>
             </div>
@@ -111,7 +110,8 @@
                 <li class="mc-2">{{item.created_at}}</li>
                 <li class="mc-3">{{item.uploader}}</li>
                 <li class="mc-2">
-                  <a class="mc-btn" :href="`${path}${item.src}`" :download="`${item.name}.${item.file_extension}`" target="_blank">檔案下載<i class="icon-7"></i></a>
+                  <a class="mc-btn" v-if="downloadJurisdiction == 1" :href="`${path}${item.src}`" :download="`${item.name}.${item.file_extension}`" target="_blank">檔案下載<i class="icon-7"></i></a>
+                  <a class="mc-btn" v-if="downloadJurisdiction == 0" href="javascript:;" target="_blank">檔案下載<i class="icon-7"></i></a>
                 </li>
               </ul>
             </div>
@@ -132,7 +132,8 @@
 
 <script>
 import Pagination from './../components/Pagination'
-import { getDownloadBanner, getFileClass, getFileList } from './../api/request'
+import { getDownloadBanner, getFileClass, getFileList, getJurisdiction } from './../api/request'
+let vm = null
 export default {
   name: 'downloads',
   components: {
@@ -140,6 +141,7 @@ export default {
   },
   data () {
     return {
+      downloadJurisdiction: "",
       isShowLoadging: true,
       swiperOptions: {
         autoplay: {
@@ -151,6 +153,15 @@ export default {
           el: '.swiper-pagination',
           clickable: true,
           bulletActiveClass: 'my-bullet-active'
+        },
+        on: {
+          click: function (e) {
+            // 这里有坑，需要注意的是：this 指向的是 swpier 实例，而不是当前的 vue， 因此借助 vm，来调用 methods 里的方法 
+            // console.log(this); // -> Swiper
+            // 当前活动块的索引，与activeIndex不同的是，在loop模式下不会将 复制的块 的数量计算在内。
+            const realIndex = this.realIndex;
+            vm.handleClickSlide(realIndex);
+          }
         }
       },
       swiperList: [],
@@ -193,28 +204,51 @@ export default {
       token: '',
       form: {
         oegionA: '',
-        oegionB: ''
+        oegionB: '',
+        value1: '',
+        value2: '',
       },
       oegionListA: [],
       oegionListB: [],
       offset: 0,
       limit: 8,
+      total: 0,
       fileListForm: {
         c_time: '',
         class_id: '',
         product_id: ''
       },
-      path: this.imgs,
-      total: 0
+      path: this.imgs
     }
+  },
+  created() {
+    vm = this;
   },
   mounted () {
     this.token = window.sessionStorage.getItem('token')
     this._getDownloadBanner()
     this._getFileClass()
     this._getFileList()
+    this._getJurisdiction()
   },
   methods: {
+    // 點擊圖片跳轉URL
+    handleClickSlide(index) {
+      if (this.swiperList[index].url) {
+        window.open(this.swiperList[index].url)
+      }
+    },
+    // 獲取會員權限
+    _getJurisdiction () {
+      getJurisdiction({ headers: { token: this.token } }).then(res => {
+        // console.log(res)
+        if (res.data.code == '200') {
+          this.downloadJurisdiction = res.data.data.download
+        } else {
+          // this.$message.error("會員權限獲取失敗")
+        }
+      })
+    },
     _getDownloadBanner () {
       getDownloadBanner({ type: 2 }, { headers: { token: this.token } }).then(res => {
         // console.log(res, '2')
@@ -224,7 +258,6 @@ export default {
     },
     _getFileClass () {
       getFileClass({ headers: { token: this.token } }).then(res => {
-        console.log(res, '66')
         if (res.data.code === '200') {
           this.oegionListA = res.data.data.rows
           // console.log(this.oegionListA)
@@ -241,69 +274,85 @@ export default {
       // console.log(this.form)
     },
     _getFileList () {
-      this.isShowLoadging = true
-
-      const { offset, limit, fileListForm } = this
-      console.log(offset, limit, fileListForm, '99')
-      getFileList({ offset, limit, fileListForm }, { headers: { token: this.token } }).then(res => {
-        console.log(res, '3')
-        if (res.data.code === '200') {
-          this.tableList = res.data.data.rows
-          this.isShowLoadging = false
-        }
-      })
-    },
-    theQuery () {
-      const { oegionA } = this.form
-      let errMsg = ''
-      // if (!value1) {
-      //   errMsg = '請選擇起始時間'
-      // } else if (!value2) {
-      //   errMsg = '請選擇結束時間'
-      // } else if (!oegionA) {
-      //   errMsg = '請選擇分類'
-      // }
-      if (!oegionA) {
-        errMsg = '請選擇分類'
-      }
-      if (errMsg) {
-        this.$message.error(errMsg)
-      }
-      // this.fileListForm.c_time = `${value1}~${value2}`
-      this.offset = 0
-      this.limit = 8
-      this.fileListForm.class_id = oegionA
-      this.fileListForm.product_id = this.form.oegionB
-      // console.log(this.fileListForm)
-      // const { fileListForm } = this.fileListForm
-      getFileList({
-        offset: this.offset,
+      const c_time = `${this.form.value1}~${this.form.value2}`
+      var form = {
+        offset: this.offset * this.limit,
         limit: this.limit,
-        class_id: this.fileListForm.class_id,
-        product_id: this.product_id
-      }, { headers: { token: this.token } }).then(res => {
+        // fileListForm: this.fileListForm
+        class_id: this.form.oegionA,
+        product_id: this.form.oegionB,
+        c_time: c_time
+      }
+      this.isShowLoadging = true
+      getFileList(form, { headers: { token: this.token } }).then(res => {
+        this.isShowLoadging = false
         if (res.data.code === '200') {
           this.tableList = res.data.data.rows
+          this.total = res.data.data.total
         }
       })
     },
+    // theQuery () {
+    //   const { oegionA } = this.form
+    //   // let errMsg = ''
+    //   // if (!this.form.value1) {
+    //   //   errMsg = '請選擇起始時間'
+    //   // } else if (!this.form.value2) {
+    //   //   errMsg = '請選擇結束時間'
+    //   // } else if (!oegionA) {
+    //   //   errMsg = '請選擇分類'
+    //   // }
+    //   // if (!oegionA) {
+    //   //   errMsg = '請選擇分類'
+    //   // }
+    //   // if (errMsg) {
+    //   //   this.$message.error(errMsg)
+    //   // }
+    //   this.fileListForm.c_time = `${this.form.value1}~${this.form.value2}`
+    //   this.offset = 0
+    //   this.limit = 8
+    //   this.fileListForm.class_id = oegionA
+    //   this.fileListForm.product_id = this.form.oegionB
+    //   // console.log(this.fileListForm)
+    //   // const { fileListForm } = this.fileListForm
+    //   getFileList({
+    //     offset: this.offset,
+    //     limit: this.limit,
+    //     class_id: this.fileListForm.class_id,
+    //     product_id: this.fileListForm.product_id,
+    //     c_time: this.fileListForm.c_time
+    //   }, { headers: { token: this.token } }).then(res => {
+    //     if (res.data.code === '200') {
+    //       this.tableList = res.data.data.rows
+    //     }
+    //   })
+    // },
     toClear () {
       this.fileListForm = {}
-      this.form = {}
+      this.form = {
+        oegionA: '',
+        oegionB: '',
+        value1: '',
+        value2: '',
+      },
+      this.offset = 0
       this._getFileList()
     },
     handleCurrentChange (e) {
+      window,scrollTo(0,0)
       if (e === 1) {
         this.offset = 0
       } else {
-        this.offset = (e - 1) * this.limit
+        // this.offset = (e - 1) * this.limit
+        this.offset = e - 1
       }
       // this._setMyArticle()
-      if (!this.from) {
-        this._getFileList()
-      } else {
+      this._getFileList()
+      // if (!this.from) {
+      //   this._getFileList()
+      // } else {
 
-      }
+      // }
     }
   }
 }
@@ -389,10 +438,15 @@ export default {
       .text-right {
         @include flex(flex-start,center);
         span {
+          width:13.4rem;
+          height:4.4rem;
+          border: 1px solid rgba(37,36,39,1);
+          text-align: center;
+          line-height: 4.4rem;
+          border-radius:.6rem;
           font-size:1.4rem;
           font-weight:400;
           color:rgba(37,36,39,1);
-          line-height:2rem;
           cursor: pointer;
         }
         .btn {
@@ -424,7 +478,8 @@ export default {
         .item-l {
           width:20.9rem;
           height:4.4rem;
-            margin-top: .6rem;
+          line-height:4.4rem;
+          margin-top: .6rem;
           background:rgba(255,255,255,1);
           border-radius:.6rem;
           border:.1rem solid rgba(61,61,61,1);
@@ -440,18 +495,18 @@ export default {
           background:rgba(37,36,39,1);
           border-radius:.1rem;
         }
-        /deep/.el-date-editor.el-input, .el-date-editor.el-input__inner {
+        .el-date-editor.el-input, .el-date-editor.el-input__inner {
           width:17.9rem;
 
         }
-        /deep/ .el-input__inner  {
+         .el-input__inner  {
           padding-left: 2rem;
           border: none;
           font-size:1.6rem;
           font-weight:400;
           color:rgba(210,210,210,1);
         }
-        /deep/ .el-input__icon {
+         .el-input__icon {
           display: none;
           width: 0;
         }
@@ -463,19 +518,23 @@ export default {
             display: block;
              margin-bottom: .6rem;
           }
-          /deep/ .el-input__inner {
-            width:29rem;
+           .el-input__inner {
+            width:20rem;
             height:4.4rem;
+            line-height:4.4rem;
             background:rgba(255,255,255,1);
             border-radius:.6rem;
             border:.1rem solid rgba(61,61,61,1);
            padding-left: 2rem;
           }
-          /deep/ .el-select .el-input .el-select__caret  {
+           .el-select .el-input .el-select__caret  {
             margin-right: 2rem;
             color: #3D3D3D;
             font-size: 1.6rem;
             font-weight: 700;
+          }
+          .el-input__icon {
+            line-height: 4.4rem;
           }
         }
         .item-r {
@@ -590,20 +649,20 @@ export default {
           .link {
             margin: 0 1rem;
           }
-          /deep/.el-date-editor.el-input, .el-date-editor.el-input__inner {
+          .el-date-editor.el-input, .el-date-editor.el-input__inner {
             width:15.9rem;
           }
-          /deep/ .el-input__inner  {
+           .el-input__inner  {
             padding-left: 2rem;
           }
         }
         .right-box {
           .item-l {
-            /deep/ .el-input__inner {
+             .el-input__inner {
               width:25rem;
               padding-left: 2rem;
             }
-            /deep/ .el-select .el-input .el-select__caret  {
+             .el-select .el-input .el-select__caret  {
               margin-right: 2rem;
             }
           }
@@ -634,11 +693,11 @@ export default {
       .time {
         .right-box {
           .item-l {
-            /deep/ .el-input__inner {
+             .el-input__inner {
               width:24rem !important;
               padding-left: 2rem;
             }
-            /deep/ .el-select .el-input .el-select__caret  {
+             .el-select .el-input .el-select__caret  {
               margin-right: 2rem;
             }
           }

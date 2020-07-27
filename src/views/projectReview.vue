@@ -11,8 +11,8 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="$router.push('/')">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">我的</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('/')">首頁</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a>我的</a></el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -24,9 +24,9 @@
             <h1>專案審核</h1>
             <p>PROJECT REVIEW</p>
           </div>
-          <div class="text-right" @click="$router.push({path:'/projectApplication'})">
+          <!-- <div class="text-right" @click="$router.push({path:'/projectApplication'})">
             申請
-          </div>
+          </div> -->
         </div>
         <div class="time">
           <div class="time-left">
@@ -57,15 +57,15 @@
             <div class="item-l">
               <span>審核狀態</span>
               <el-select placeholder="請選擇狀態" v-model="form.is_pass">
-                <el-option label="审核中" value="0"></el-option>
-                <el-option label="审核通过" value="1"></el-option>
-                <el-option label="审核不通过" value="2"></el-option>
+                <el-option label="審核中" value="0"></el-option>
+                <el-option label="審核通過" value="1"></el-option>
+                <el-option label="審核不通過" value="2"></el-option>
               </el-select>
             </div>
           </div>
           <div class="right-btn">
             <span @click="toClear">清除</span>
-            <a href="javascript:;" @click="theQuery">查詢</a>
+            <a @click="_getMyProject">查詢</a>
           </div>
         </div>
         <div class="table-box">
@@ -74,6 +74,7 @@
               <ul>
                 <li class="mc-1">申請人</li>
                 <li class="mc-2">公司名稱</li>
+                <li class="mc-1">客戶名稱</li>
                 <li class="mc-3">專案名稱</li>
               </ul>
             </div>
@@ -88,8 +89,10 @@
           <div class="table-centent" v-for="(item,index) in tableList" :key="index">
              <div class="hade-l">
               <ul>
-                <li class="mc-1"><img :src="`${path}${item.user_head}`" alt="">{{item.nick_name}}</li>
+                <!-- <li class="mc-1"><img :src="`${path}${item.user_head}`" alt="">{{item.nick_name}}</li> -->
+                <li class="mc-1"><img src="./../assets/imgs/safety-user.png" alt="">{{item.nick_name}}</li>
                 <li class="mc-2">{{item.cpname}}</li>
+                <li class="mc-1">{{item.client_name}}</li>
                 <li class="mc-3">{{item.project_name}}</li>
               </ul>
             </div>
@@ -98,7 +101,7 @@
                 <li class="mc-2">{{item.created_at}}</li>
                 <li class="mc-1" :class="{'color-0': item.is_pass == '0','color-1': item.is_pass == '1','color-2': item.is_pass == '2'}">{{passType(item.is_pass)}}</li>
                 <li class="mc-3">
-                  <a class="mc-btn" href="javascrpt:;" @click="$router.push({path:'/history',query: {project_id:item.id}})">歷程記錄</a>
+                  <a class="mc-btn" @click="$router.push({path:'/history',query: {project_id:item.id}})">歷程記錄</a>
                 </li>
               </ul>
             </div>
@@ -188,82 +191,90 @@ export default {
       token: window.sessionStorage.getItem('token'),
       path: this.imgs,
       offset: 0,
-      limit: 8,
+      limit: 10,
       total: 0
     }
   },
   mounted () {
     this._getMyProject()
-    this._myAuditProject()
+    // this._myAuditProject()
   },
   computed: {
     passType () {
       return (type) => {
         if (type === '0') {
-          return '审核中'
+          return '審核中'
         } else if (type === '1') {
-          return '审核通过'
+          return '審核通過'
         } else {
-          return '审核不通过'
+          return '審核不通過'
         }
       }
     }
   },
   methods: {
-    _myAuditProject () {
-      myAuditProject({}, { headers: { token: this.token } }).then(res => {
-        console.log(res, 2)
-      })
-    },
+    // _myAuditProject () {
+    //   myAuditProject({}, { headers: { token: this.token } }).then(res => {
+    //     console.log(res, 2)
+    //   })
+    // },
     _getMyProject () {
-      const { offset, limit } = this
-      myAuditProject({ offset, limit, is_pass: this.form.is_pass }, { headers: { token: this.token } }).then(res => {
+      const c_time = `${this.form.value1}~${this.form.value2}`
+      var form = {
+        offset: this.offset * this.limit,
+        limit: this.limit,
+        c_time: c_time,
+        is_pass: this.form.is_pass
+      }
+      myAuditProject(form, { headers: { token: this.token } }).then(res => {
+        this.isShowLoading = false
         if (res.data.code !== '200') {
-          this.isShowLoading = false
           this.$message.error('獲取數據失敗!')
         } else {
-          console.log(res, '3')
-          this.isShowLoading = false
           this.total = res.data.data.total
           this.tableList = res.data.data.rows
         }
       })
     },
-    theQuery () {
-      // eslint-disable-next-line camelcase
-      const { value1, value2, is_pass } = this.form
-      let errMsg = ''
-      if (!value1) {
-        errMsg = '請選擇起始時間'
-      } else if (!value2) {
-        errMsg = '請選擇結束時間'
-      // eslint-disable-next-line camelcase
-      } else if (!is_pass) {
-        errMsg = '請選擇狀態'
-      }
-      if (errMsg) {
-        this.$message.error(errMsg)
-        return
-      }
-      // eslint-disable-next-line camelcase
-      const c_time = `${value1}~${value2}`
-      this.offset = 0
-      this.limit = 8
-      this.isShowLoading = true
-      const { offset, limit } = this
-      myAuditProject({ offset, limit, c_time, is_pass }, { headers: { token: this.token } }).then(res => {
-        if (res.data.code !== '200') {
-          this.$message.error('獲取數據失敗!')
-          this.isShowLoading = false
-        } else {
-          this.tableList = res.data.data.rows
-          this.total = res.data.data.total
-          this.isShowLoading = false
-        }
-      })
-    },
+    // theQuery () {
+    //   // eslint-disable-next-line camelcase
+    //   const { value1, value2, is_pass } = this.form
+    //   // let errMsg = ''
+    //   // if (!value1) {
+    //   //   errMsg = '請選擇起始時間'
+    //   // } else if (!value2) {
+    //   //   errMsg = '請選擇結束時間'
+    //   // eslint-disable-next-line camelcase
+    //   // } else if (!is_pass) {
+    //   //   errMsg = '請選擇狀態'
+    //   // }
+    //   // if (errMsg) {
+    //   //   this.$message.error(errMsg)
+    //   //   return
+    //   // }
+    //   // eslint-disable-next-line camelcase
+    //   const c_time = `${value1}~${value2}`
+    //   this.offset = 0
+    //   this.limit = 10
+    //   this.isShowLoading = true
+    //   const { offset, limit } = this
+    //   myAuditProject({ offset, limit, c_time, is_pass }, { headers: { token: this.token } }).then(res => {
+    //     this.isShowLoading = false
+    //     if (res.data.code !== '200') {
+    //       this.$message.error('獲取數據失敗!')
+    //     } else {
+    //       this.tableList = res.data.data.rows
+    //       this.total = res.data.data.total
+    //     }
+    //   })
+    // },
     toClear () {
-      this.form = {}
+      this.form = {
+        value1: '',
+        value2: '',
+        is_pass: ''
+      }
+      this.offset = 0
       this.isShowLoading = true
       this._getMyProject()
     },
@@ -271,8 +282,10 @@ export default {
       if (e === 1) {
         this.offset = 0
       } else {
-        this.offset = (e - 1) * this.limit
+        // this.offset = (e - 1) * this.limit
+        this.offset = e - 1
       }
+      window,scrollTo(0,0)
       this.isShowLoading = true
       this._getMyProject()
     }
@@ -357,6 +370,7 @@ export default {
         .item-left {
           width:14.9rem;
           height:4.4rem;
+          line-height: 4.4rem;
           margin-top: .6rem;
           background:rgba(255,255,255,1);
           border-radius:.6rem;
@@ -374,11 +388,11 @@ export default {
           background:rgba(37,36,39,1);
           border-radius:.1rem;
         }
-        /deep/.el-date-editor.el-input, .el-date-editor.el-input__inner {
+        .el-date-editor.el-input, .el-date-editor.el-input__inner {
           width:11.9rem;
           // padding-right: 0;
         }
-        /deep/ .el-input__inner  {
+         .el-input__inner  {
           padding-left: 2rem;
           border: none;
           font-size:1.6rem;
@@ -386,7 +400,7 @@ export default {
           color:rgba(210,210,210,1);
            padding-right: 0;
         }
-        /deep/ .el-input__icon {
+         .el-input__icon {
           display: none;
           width: 0;
         }
@@ -398,32 +412,42 @@ export default {
             display: block;
              margin-bottom: .6rem;
           }
-          /deep/ .el-input__inner {
-            width:33.7rem;
+           .el-input__inner {
+            width:20.7rem;
             height:4.4rem;
+            line-height: 4.4rem;
             background:rgba(255,255,255,1);
             border-radius:.6rem;
             border:.1rem solid rgba(61,61,61,1);
            padding-left: 2rem;
           }
-          /deep/ .el-select .el-input .el-select__caret  {
+           .el-select .el-input .el-select__caret  {
             margin-right: 2rem;
             color: #3D3D3D;
             font-size: 1.6rem;
             font-weight: 700;
+          }
+          .el-input__icon {
+            line-height: 4.4rem;
           }
         }
       }
       .right-btn {
         @include flex();
         margin-top: 2.6rem;
-        margin-left: 16.8rem;
+        margin-left: 6.8rem;
         span {
+          cursor: pointer;
+          width:13.4rem;
+          height:4.4rem;
+          border: 1px solid rgba(42,42,44,1);
+          border-radius:.6rem;
           font-size:1.4rem;
           font-weight:400;
           color:rgba(37,36,39,1);
           line-height:2rem;
           margin-right: 3rem;
+          @include flex(center);
         }
         a {
           width:13.4rem;
@@ -498,7 +522,7 @@ export default {
                 width: 2.6rem;
                 height: 2.6rem;
                 border-radius: 50%;
-                overflow: hidden;
+                // overflow: hidden;
                 margin-right: .8rem;
               }
             }
@@ -543,10 +567,10 @@ export default {
           .link {
             margin: 0 1rem;
           }
-          /deep/.el-date-editor.el-input, .el-date-editor.el-input__inner {
+          .el-date-editor.el-input, .el-date-editor.el-input__inner {
             // width:15.9rem;
           }
-          /deep/ .el-input__inner  {
+           .el-input__inner  {
             padding-left: 2rem;
           }
 
@@ -554,11 +578,11 @@ export default {
         .right-box {
           margin-left: 3rem;
           .item-l {
-            /deep/ .el-input__inner {
+             .el-input__inner {
               width:25rem;
               padding-left: 2rem;
             }
-            /deep/ .el-select .el-input .el-select__caret  {
+             .el-select .el-input .el-select__caret  {
               margin-right: 2rem;
             }
           }
@@ -593,11 +617,11 @@ export default {
       .time {
         .right-box {
           .item-l {
-            /deep/ .el-input__inner {
+             .el-input__inner {
               width:24rem !important;
               padding-left: 2rem;
             }
-            /deep/ .el-select .el-input .el-select__caret  {
+             .el-select .el-input .el-select__caret  {
               margin-right: 2rem;
             }
           }

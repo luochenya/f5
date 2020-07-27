@@ -3,18 +3,25 @@
     <div class="audit-modal" v-show="showModal">
       <div class="mask"></div>
       <div class="modal-dialog">
-        <div class="modal-header">
+        <div class="modal-header" v-if="showTitle == 1">
           <div class="img"><img src="./../assets/imgs/review-failed.png" alt=""></div>
           <div class="text">
             <div class="name">審核未通過</div>
             <p>REVIEW FAILED</p>
           </div>
         </div>
+        <div class="modal-header" v-if="showTitle == 2">
+          <div class="img"><img src="./../assets/imgs/success.png" alt=""></div>
+          <div class="text">
+            <div class="name">審核通過</div>
+            <p>SUCCESS</p>
+          </div>
+        </div>
         <div class="modal-body">
           <slot name="body"></slot>
         </div>
        <div class="modal-footer">
-          <a href="javascript:;" class="btn"  @click="$emit('submit')">確認送出</a>
+          <a class="btn"  @click="$emit('submit')">確認送出</a>
         </div>
       </div>
 
@@ -36,6 +43,7 @@ export default {
     // 按钮类型: 1: 确定按钮  2: 取消按钮   3:确认取消
     btnType: String,
     showModal: Boolean,
+    showTitle: Number,
     imgShow: Boolean
   }
 }

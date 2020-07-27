@@ -1,10 +1,11 @@
 /** axios封装
- * 请求拦截、相应拦截、错误统一处理
+ * 請求拦截、相应拦截、错误统一处理
  */
 import axios from 'axios'
 import QS from 'qs'
+import router from '@/router'
 // import store from '../store/index'
-// import { Message } from 'element-ui'
+import { Message } from 'element-ui'
 
 // 环境的切换
 /* if (process.env.NODE_ENV === 'development') {
@@ -14,13 +15,19 @@ import QS from 'qs'
 } else if (process.env.NODE_ENV === 'production') {
   axios.defaults.baseURL = 'http://api.123dailu.com/'
 } */
-// axios.defaults.baseURL = '/api'
-axios.defaults.baseURL = process.env.VUE_APP_BASEURL
+axios.defaults.baseURL = 'http://f5point.twczw.website/api'
+if (process.env.NODE_ENV === 'serve') {
+  axios.defaults.baseURL = process.env.VUE_APP_BASEURL
+} else if (process.env.NODE_ENV === 'build') {
+  axios.defaults.baseURL = window.location.protocol + "//" + window.location.host + "/api"
+} else {
+  axios.defaults.baseURL = window.location.protocol + "//" + window.location.host
+}
 
-// 请求超时时间
-axios.defaults.timeout = 10000
+// 請求超时时间
+axios.defaults.timeout = 300000
 
-// post请求头
+// post請求头
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
 
 // 接口错误拦截
@@ -28,10 +35,10 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 
 // })
 
-// 请求拦截器
+// 請求拦截器
 /* axios.interceptors.request.use(
   config => {
-    // 每次发送请求之前判断是否存在token，如果存在，则统一在http请求的header都加上token，不用每次请求都手动添加了
+    // 每次发送請求之前判断是否存在token，如果存在，则统一在http請求的header都加上token，不用每次請求都手动添加了
     // 即使本地存在token，也有可能token是过期的，所以在响应拦截器中要对返回状态进行判断
     // const token = store.state.token
     // token && (config.headers.Authorization = token)
@@ -46,6 +53,18 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
     return Promise.error(error)
   })
  */
+//http response 拦截器
+axios.interceptors.response.use(
+  response => {
+    if (response.data.code == "202") {
+      router.replace({ name: 'login' })
+    }
+    return response;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
 // 响应拦截器
 // axios.interceptors.response.use(
 //   response => {
@@ -79,7 +98,7 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 //           // 跳转登录页面
 //         case 403:
 //           this.$message.error({
-//             message: '登录过期，请重新登录',
+//             message: '登录过期，請重新登录',
 //             duration: 1000,
 //             forbidClick: true
 //           })
@@ -96,10 +115,10 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 //             })
 //           }, 1000)
 //           break
-//           // 404请求不存在
+//           // 404請求不存在
 //         case 404:
 //           this.$message.error({
-//             message: '网络请求不存在',
+//             message: '网络請求不存在',
 //             duration: 1500,
 //             forbidClick: true
 //           })
@@ -117,9 +136,9 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 //   }
 // )
 /**
- * get方法，对应get请求
- * @param {String} url [请求的url地址]
- * @param {Object} params [请求时携带的参数]
+ * get方法，对应get請求
+ * @param {String} url [請求的url地址]
+ * @param {Object} params [請求时携带的参数]
  */
 export function get (url, params) {
   return new Promise((resolve, reject) => {
@@ -135,9 +154,9 @@ export function get (url, params) {
   })
 }
 /**
- * post方法，对应post请求
- * @param {String} url [请求的url地址]
- * @param {Object} params [请求时携带的参数]
+ * post方法，对应post請求
+ * @param {String} url [請求的url地址]
+ * @param {Object} params [請求时携带的参数]
  */
 export function post (url, params, headers) {
   return new Promise((resolve, reject) => {
@@ -164,9 +183,9 @@ export function posts (url, params, headers) {
 }
 
 /**
- * put方法，对应put请求
- * @param {String} url [请求的url地址]
- * @param {Object} params [请求时携带的参数]
+ * put方法，对应put請求
+ * @param {String} url [請求的url地址]
+ * @param {Object} params [請求时携带的参数]
  */
 export function put (url, params) {
   return new Promise((resolve, reject) => {
@@ -181,9 +200,9 @@ export function put (url, params) {
 }
 
 /**
- * delete方法，对应delete请求
- * @param {String} url [请求的url地址]
- * @param {Object} params [请求时携带的参数]
+ * delete方法，对应delete請求
+ * @param {String} url [請求的url地址]
+ * @param {Object} params [請求时携带的参数]
  */
 export function Delete (url, params) {
   return new Promise((resolve, reject) => {

@@ -45,7 +45,7 @@
             <div class="card">
               <label>
                 <span class="bg"></span >
-                <div class="name">(M)</div>
+                <div class="name" style="text-indent:5em">(M)</div>
                 <input v-model="formA.unker_phone[1]"  type="text" placeholder="請填寫電話號碼">
               </label>
             </div>
@@ -98,7 +98,7 @@
               <label>
                 <span class="bg"></span>
                 <div class="name">競爭廠商(原廠)</div>
-                <input v-model="formA.comp_manu_origina" type="text" placeholder="請填寫廠商資訊">
+                <input v-model="formA.comp_manu_original" type="text" placeholder="請填寫廠商資訊">
               </label>
             </div>
             <div class="card">
@@ -122,7 +122,7 @@
                 <span></span>
                  <h3>產品型號</h3>
               </div>
-            <span class="el-icon-close" v-show="product_program && product_program.length>1 && index>0" @click="close(index)"></span>
+              <span class="el-icon-close" v-show="product_program && product_program.length>1 && index>0" @click="close(index)"></span>
             </div>
             <div class="card">
               <p>產品</p>
@@ -133,7 +133,7 @@
             <div class="card">
               <label>
                 <p>數量</p>
-                <input v-model="product.product_type_mum" type="text" placeholder="請填寫產品數量"  @blur.prevent="changeIpt('1',index)">
+                <input v-model="product.product_type_num" type="text" placeholder="請填寫產品數量"  @blur.prevent="changeIpt('1',index)">
               </label>
             </div>
             <div class="bootm-title">
@@ -147,7 +147,7 @@
                 <div class="radio-box" v-for="(items,i) in moduleList[index]" :key="i">
                   <!-- <span class="radio-item" :class="{'on': checkedType == items.iindexd && type ==index+1 }"></span> -->
                   <label>
-                       <input type="checkbox" :value="items" @change="clickMe(product.project_module,i,index)"  v-model="product.project_module" class="input-radio">
+                       <input type="checkbox" :value="items" @change="clickMe(product.product_module,i,index)"  v-model="product.product_module" class="input-radio">
                        <span></span>
                        {{items.module_name}}
                   </label>
@@ -177,7 +177,7 @@ export default {
   name: 'to-apply-for-a',
   data () {
     return {
-      a: [{ product_type: '', product_type_Name: '', product_type_mum: '', project_module: [], others: '' }],
+      a: [{ product_type: '', product_type_num: '', product_module: [], others: '' }],
       value: '',
       radio: '',
       checkedType: '',
@@ -203,7 +203,7 @@ export default {
         client_name: '',
         project_name: '',
         organizer: '',
-        unker_phone: [],
+        unker_phone: ["", ""],
         undertaker: '',
         exp_close_quarter: '',
         exp_close_month: '',
@@ -211,13 +211,13 @@ export default {
         five_budget: '',
         industry: '',
         unker_email: '',
-        comp_manu_origina: '',
+        comp_manu_original: '',
         comp_manu_dealer: ''
       },
       productList: [],
       moduleList: [],
-      product_program: [{ product_type: '', product_type_name: '', product_type_mum: '', project_module: [], others: '' }],
-      product_programs: [{ product_type: '', product_type_name: '', product_type_mum: '', project_module: [], others: '' }]
+      product_program: [{ product_type: '', product_type_num: '', product_module: [], others: '' }],
+      product_programs: [{ product_type: '', product_type_num: '', product_module: [], others: '' }]
     }
   },
   mounted () {
@@ -226,7 +226,6 @@ export default {
   methods: {
     _getProductType () {
       getProductType({ headers: { token: this.token } }).then(res => {
-        console.log(res)
         if (res.data.code !== '200') {
           this.$message.error('獲取數據失敗！')
         } else {
@@ -235,13 +234,9 @@ export default {
       })
     },
     oegionChange (index) {
-      // console.log(this.a, 'a')
       this.moduleList[index] = this.a[index]._child
-      this.product_programs[index].product_type = this.a[index].id
-
-      this.product_programs[index].product_type_name = this.a[index].type_name
-      this.product_program[index].product_type = this.a[index].id
-      this.product_program[index].product_type_name = this.a[index].type_name
+      this.product_programs[index].product_type = this.a[index].type_name
+      this.product_program[index].product_type = this.a[index].type_name
       // console.log(this.product_programs[index], 'p')
     },
     check (id, index) {
@@ -258,15 +253,13 @@ export default {
         this.checkedType = id
         this.type = index + 1
       }
-
-      console.log(id, index, this.type)
     },
     clickMe (items, i, index) {
       const resultArr = []
       items.forEach(item => {
-        resultArr.push(item.id)
+        resultArr.push(item.module_name)
       })
-      this.product_programs[index].project_module = resultArr.filter(function (item, i, self) {
+      this.product_programs[index].product_module = resultArr.filter(function (item, i, self) {
         return self.indexOf(item) === i
       })
       // console.log(items, i, index, '00')
@@ -275,24 +268,23 @@ export default {
     changeIpt (type, index) {
       if (type === '1') {
         // console.log('input', index)
-        this.product_programs[index].product_type_mum = this.product_program[index].product_type_mum
+        this.product_programs[index].product_type_num = this.product_program[index].product_type_num
       } else {
         this.product_programs[index].others = this.product_program[index].others
-        console.log(this.product_programs[index].others)
       }
     },
     add () {
       // storage.clear('formA')
       // console.log(this.projectModule)
-      this.product_program.push({ product_type: '', product_type_name: '', product_type_mum: '', project_module: [], others: '' })
-      this.product_programs.push({ product_type: '', product_type_name: '', product_type_mum: '', project_module: [], others: '' })
-      this.a.push({ product_type: '', product_type_name: '', product_Type_mum: '', project_module: [], others: '' })
+      this.product_program.push({ product_type: '', product_type_num: '', product_module: [], others: '' })
+      this.product_programs.push({ product_type: '', product_type_num: '', product_module: [], others: '' })
+      this.a.push({ product_type: '', product_type_num: '', product_module: [], others: '' })
     },
     ...mapActions(['getFormA']),
     next () {
       // eslint-disable-next-line camelcase
       const { formA, product_program } = this
-      // const { client_name, project_name, organizer, unker_phone, undertaker, mobile, exp_close_quarter, exp_close_month, total_budget, five_budget, industry, unker_email, comp_manu_origina, comp_manu_dealer } = formA
+      // const { client_name, project_name, organizer, unker_phone, undertaker, mobile, exp_close_quarter, exp_close_month, total_budget, five_budget, industry, unker_email, comp_manu_original, comp_manu_dealer } = formA
       let errMsg = ''
       if (!formA.client_name) {
         errMsg = '請填寫客戶名稱!'
@@ -319,20 +311,19 @@ export default {
       if (!formA.unker_phone.length > 0) {
         errMsg = '請填寫電話號碼 !'
       }
-      formA.unker_phone.forEach(item => {
-        if (!/^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(item)) {
-          errMsg = '請填寫正確電話號碼!'
-        }
-      })
+      // formA.unker_phone.forEach(item => {
+      //   if (!/^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(item)) {
+      //     errMsg = '請填寫正確電話號碼!'
+      //   }
+      // })
       // eslint-disable-next-line camelcase
-      console.log(product_program)
       product_program.forEach(item => {
         if (!item.product_type) {
           errMsg = '請選擇產品!'
-        } else if (!item.product_type_mum) {
+        } else if (!item.product_type_num) {
           errMsg = '請填寫產品數量!'
-        } else if (!item.project_module) {
-          errMsg = '請選擇模型!'
+        } else if (!item.product_module.length) {
+          errMsg = '請選擇產品模型!'
         }
       })
       if (errMsg) {
@@ -344,7 +335,7 @@ export default {
         product_program: this.product_program,
         product_programs: this.product_programs
       }
-      // console.log(form, 'f')
+      console.log(form, 'f')
       this.$emit('next', form)
     },
     close (i) {
@@ -431,7 +422,7 @@ export default {
                 background:rgba(245,246,247,1);
               }
               .name {
-                width: 12.3rem;
+                width: 12.4rem;
                 font-size:1.6rem;
                 font-weight:400;
                 color:rgba(37,36,39,1);
@@ -447,6 +438,15 @@ export default {
                 font-weight:400;
                 color:rgba(189,189,189,1);
                 line-height:2.2rem;
+              }
+              input::-webkit-input-placeholder {
+                color:#bdbdbd;
+              }
+              input::-moz-input-placeholder {
+                color:#bdbdbd;
+              }
+              input::-ms-input-placeholder {
+                color:#bdbdbd;
               }
             }
           }
@@ -520,11 +520,30 @@ export default {
             padding-left: 3rem;
             margin-bottom: 2rem;
             p {
+              width: 10rem;
               margin-right: 1.4rem;
               font-size:1.6rem;
               font-weight:400;
               color:rgba(37,36,39,1);
               line-height:2.2rem;
+            }
+            input {
+              border: none;
+              outline: none;
+              background:rgba(245,246,247,1);
+              font-size:1.6rem;
+              font-weight:400;
+              color:rgba(189,189,189,1);
+              line-height:2.2rem;
+            }
+            input::-webkit-input-placeholder {
+              color:#bdbdbd;
+            }
+            input::-moz-input-placeholder {
+              color:#bdbdbd;
+            }
+            input::-ms-input-placeholder {
+              color:#bdbdbd;
             }
             .el-select {
               width: 86%;
@@ -534,7 +553,7 @@ export default {
               font-size:1.6rem;
               background:rgba(245,246,247,1);
               font-weight:400;
-              color:rgba(37,36,39,1)
+              color:#bdbdbd
             }
             .el-select .el-input .el-select__caret {
               color: #3D3D3D;
@@ -635,6 +654,27 @@ export default {
               font-weight:400;
               color:rgba(189,189,189,1);
               line-height:2.2rem;
+              resize:none;
+            }
+            textarea::-webkit-input-placeholder {
+                /* WebKit browsers */
+                color: #bdbdbb;
+                font-size:1.6rem;
+            }
+            textarea:-moz-placeholder {
+                /* Mozilla Firefox 4 to 18 */
+                color: #bdbdbb;
+                font-size:1.6rem;
+            }
+            textarea::-moz-placeholder {
+                /* Mozilla Firefox 19+ */
+                color: #bdbdbb;
+                font-size:1.6rem;
+            }
+            textarea::-ms-input-placeholder {
+                /* Internet Explorer 10+ */
+                color: #bdbdbb;
+                font-size:1.6rem;
             }
             p {
               @include flex(flex-end);

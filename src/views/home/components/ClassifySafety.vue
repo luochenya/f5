@@ -1,7 +1,7 @@
 <template>
   <div class="classify-safety">
     <div class="safety">
-      <div class="item" v-for="(item,index) in list" :key="index" @click="$router.push({path:`/selectedArticleDetails/${item.id}`})">
+      <div class="item" v-for="(item,index) in list" :key="index" @click="toSelectedArticleDetails(item.id)">
         <img :src="`${imgs}${item.imgs}`" alt="" class="imgs">
         <div class="content">
           <h2>{{item.title}}</h2>
@@ -11,9 +11,12 @@
           <div class="text" v-html="item.content"></div>
           <div class="user">
             <div class="img">
-              <img src="./../../../assets/imgs/safety-user.png" alt="">
+              <img v-if="item.uploader_img" :src="`${imgs}${item.uploader_img}`" alt="">
+              <img v-else-if="item.user_head" :src="`${imgs}${item.user_head}`" alt="">
+              <img src="./../../../assets/imgs/head-portrait.svg" alt="">
             </div>
-            <span>發表人：郭子君</span>
+            <span v-if="item.uploader">發表人：{{ item.uploader }}</span>
+            <span v-else>發表人：{{ item.nick_name }}</span>
           </div>
         </div>
       </div>
@@ -27,7 +30,9 @@ export default {
   props: {
     list: {
       type: Array
-    }
+    },
+    name: String,
+    class_id: String
   },
   data () {
     return {
@@ -56,7 +61,51 @@ export default {
           name: '郭子君'
         }
 
-      ]
+      ],
+      pageTitle: "",
+      pageTitles: "",
+      type: "",
+      classify: ""
+    }
+  },
+  mounted() {
+    if (this.$route.query.f5 == "0") {
+      this.pageTitle = "F5專區"
+      this.type = 1
+    } else if (this.$route.query.agencyId == "2") {
+      this.type = 3
+      this.classify = 2
+      this.pageTitle = "代理商專區"
+      this.pageTitles = "逸盈科技NETFOS"
+    } else if (this.$route.query.agencyId == "3") {
+      this.type = 3
+      this.classify = 3
+      this.pageTitle = "代理商專區"
+      this.pageTitles = "零壹科技ZERONE"
+    } else if (this.$route.query.agencyId == "22") {
+      this.type = 3
+      this.classify = 1
+      this.pageTitle = "代理商專區"
+      this.pageTitles = "創泓科技Uniforce"
+    } else if (this.$route.query.dealers == "4") {
+      this.type = 2
+      this.pageTitle = "經銷商專區"
+    } else {
+      this.type = 0
+      this.pageTitle = "首頁"
+    }
+  },
+  methods: {
+    toSelectedArticleDetails (id) {
+      this.$router.push({ path: '/selectedArticleDetails', query: { 
+        article_id: id,
+        titleName: this.name,
+        pageTitle: this.pageTitle,
+        pageTitles: this.pageTitles,
+        type: this.type,
+        classify: this.classify,
+        class_id: this.class_id
+      } }) 
     }
   }
 }
@@ -234,4 +283,13 @@ export default {
 
   }
 }
+ @media screen and (max-width: 767px) {
+   .safety {
+     display: block;
+     .item {
+       width: 100%;
+       margin-left: 0 !important;
+     }
+   }
+ }
 </style>

@@ -3,38 +3,45 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="$router.push('/')">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item>精選文章分類</el-breadcrumb-item>
-          <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
+          <el-breadcrumb-item>
+            <a>{{pageTitle}}</a><!--  @click="toRouter()" -->
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="pageTitle == '代理商專區'">
+            <a @click="toRouter()">{{pageTitles}}</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="toselectedArticleClassifications()">文章分類</a></el-breadcrumb-item>
+          <el-breadcrumb-item :class="{'checked': title}">{{title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
     </div>
     <div class="content">
       <div class="container">
         <div class="title">
-          <h1>應用安全·精選文章</h1>
+          <h1>{{title}}·文章</h1>
           <p>LATEST NEWS</p>
         </div>
         <div class="main dmax-md-none">
-          <div class="main-item" v-for="(item,index) in newsList" :key="index" @click="$router.push({path:`/selectedArticleDetails/${index}`})">
+          <div class="main-item" v-for="(item,index) in ClassifySafetyList" :key="index" @click="toSelectedArticleDetails(item.id)">
             <div class="item-img">
-              <img src="./../../../assets/imgs/latestnews-1.png" alt="">
+              <img :src="`${path}${item.imgs}`" alt="">
             </div>
             <div class="item-text">
               <div class="name">
-                <h1>{{item.name}}</h1>
-                <span>創建於 3月10日  18:32</span>
+                <h1>{{item.title}}</h1>
+                <span>創建於 {{item.created_at}}</span>
               </div>
-              <div class="text">{{item.text}}</div>
+              <div class="text" v-html="item.content"></div>
               <div class="user">
                 <div class="user-img">
                   <div class="img">
-                    <img src="./../../../assets/imgs/safety-user.png" alt="">
+                    <img v-if="item.uploader_img" :src="`${path}${item.uploader_img}`" alt="">
+                    <img v-else-if="item.user_head" :src="`${path}${item.user_head}`" alt="">
+                    <img v-else src="./../../../assets/imgs/head-portrait.svg" alt="">
                   </div>
-                  <span>發表人：郭子君</span>
+                  <span>發表人：{{ item.uploader ? item.uploader : item.nick_name }}</span>
                 </div>
                 <div class="tip">
-                  <i class="icon-6"></i>查看234235
+                  <!-- <i class="icon-6"></i>查看234235 -->
                 </div>
             </div>
             </div>
@@ -43,27 +50,29 @@
         </div>
         <!-- phone -->
         <div class="main d-md-none">
-          <div class="main-item" v-for="(item,index) in newsList" :key="index" @click="$router.push({path:`/selectedArticleDetails/${index}`})">
+          <div class="main-item" v-for="(item,index) in ClassifySafetyList" :key="index" @click="toSelectedArticleDetails(item.id)">
             <div class="item-text">
               <div class="name">
-                <h1>{{item.name}}</h1>
-                <span>創建於 3月10日  18:32</span>
+                <h1>{{item.title}}</h1>
+                <span>創建於 {{item.created_at}}</span>
               </div>
               <div class="img-text">
                 <div class="item-img">
-                  <img src="./../../../assets/imgs/latestnews-1.png" alt="">
+                  <img :src="`${path}${item.imgs}`" alt="">
                 </div>
-                <div class="text">{{item.text}}</div>
+                <div class="text" v-html="item.content"></div>
               </div>
               <div class="user">
                 <div class="user-img">
                   <div class="img">
-                    <img src="./../../../assets/imgs/safety-user.png" alt="">
+                    <img v-if="item.uploader_img" :src="`${path}${item.uploader_img}`" alt="">
+                    <img v-else-if="item.user_head" :src="`${path}${item.user_head}`" alt="">
+                    <img v-else src="./../../../assets/imgs/head-portrait.svg" alt=""> 
                   </div>
-                  <span>發表人：郭子君</span>
+                  <span>發表人：{{ item.uploader ? item.uploader : item.nick_name }}</span>
                 </div>
                 <div class="tip">
-                  <i class="icon-6"></i>查看234235
+                  <!-- <i class="icon-6"></i>查看234235 -->
                 </div>
             </div>
             </div>
@@ -73,50 +82,155 @@
         <!-- oo -->
       </div>
     </div>
-    <pagination></pagination>
+     <pagination
+      :currentpage="offset+1"
+      :pagesize="limit"
+      :total="total"
+      :handleCurrentChange="handleCurrentChange"
+      :isHidePage="true"
+    ></pagination>
   </div>
 </template>
 
 <script>
 import Pagination from './../../../components/Pagination'
+import { systemFeaturedArticles, getArticleList } from './../../../api/request'
 export default {
   components: {
     Pagination
   },
   data () {
     return {
-      newsList: [
-        {
-          img: './../../../assets/imgs/latestnews-1.png',
-          name: 'Shape正式加入F5以捍衛每個應用程序免受欺詐和濫用',
-          text: '在線應用程序今天運行世界。應用程序推動了我們的互動方式，學習方式和增長方式，數據的存放位置以及品牌。'
-
-        }, {
-          img: './../../../assets/imgs/latestnews-1.png',
-          name: '從解決方案到堆棧：組裝時代',
-          text: 'IT的這種組件化就像負責安全和交付的應用程序的組件化一樣。據估計，現代應用程序中有80％到90％由第三方組件組成，其中大多數是開源的。這樣做的好處包括速度。'
-
-        }, {
-          img: './../../../assets/imgs/latestnews-1.png',
-          name: '“應用程序服務狀態”告訴我們有關組織準備情況的信息',
-          text: '隨著組織迅速動員全球團隊在家中工作，他們正在考慮其企業應用程序的性能，可用性和安全性。在與全球客戶和合作夥伴的最近對話中，我們有趣地看到。'
-
-        }, {
-          img: './../../../assets/imgs/latestnews-1.png',
-          name: '在COVID-19的潮流中吸引全球團隊和社區的參與',
-          text: '隨著COVID-19繼續在全球範圍內發揮影響，F5的首席人力資源官Ana White和首席營銷。'
-
-        }, {
-          img: './../../../assets/imgs/latestnews-1.png',
-          name: '用F5的Essential App Protect填補Web應用程序安全漏洞',
-          text: 'Essential App Protect可以為Web應用程序（無論部署在何處）提供簡單，快速和可擴展的基於雲的安全性，從而消除了保護應用程序的複雜性和猜測。可以在幾分鐘內激活該服務，從而為應用程序提供開箱即用的保護。'
-
-        }
-      ]
+      path: this.imgs,
+      token: window.sessionStorage.getItem('token'),
+      title: this.$route.query.title,
+      class_id: this.$route.query.class_id,
+      type: this.$route.query.type,
+      classify: this.$route.query.classify,
+      offset: 0,
+      limit: 5,
+      total: 0,
+      ClassifySafetyList: [],
+      newsList: [],
+      pageTitle: "",
+      pageTitles: ""
     }
   },
-  mounted () {
-
+  created () {
+    this._getFeaturedArticles()
+  },
+  mounted() {
+    if (this.$route.query.type == "1") {
+      this.pageTitle = "F5專區"
+    } else if (this.$route.query.type == "3") {
+      if (this.$route.query.classify == "1") {
+        this.pageTitle = "代理商專區"
+        this.pageTitles = "創泓科技Uniforce"
+      } else if (this.$route.query.classify == "2") {
+        this.pageTitle = "代理商專區"
+        this.pageTitles = "逸盈科技NETFOS"
+      } else if (this.$route.query.classify == "3") {
+        this.pageTitle = "代理商專區"
+        this.pageTitles = "零壹科技ZERONE"
+      }
+    } else if (this.$route.query.type == "2") {
+      this.pageTitle = "經銷商專區"
+    } else {
+      this.pageTitle = "首頁"
+    }
+  },
+  methods: {
+    // 路由跳轉
+    toRouter() {
+      if (this.pageTitle == 'F5專區') {
+        this.$router.push({ path: '/pushInformation', query: { f5: 0 } })
+      } else if (this.pageTitle == '首頁') {
+        this.$router.push({ path: '/pushInformation' })
+      } else if (this.pageTitle == '經銷商專區') {
+        this.$router.push({ path: '/pushInformation', query: { dealers: 4 } })
+      } else if (this.pageTitle == '代理商專區') {
+        if (this.pageTitles == '逸盈科技NETFOS') {
+          this.$router.push({ path: '/pushInformation', query: { agencyId: 3 } })
+        } else if (this.pageTitles == '零壹科技ZERONE') {
+          this.$router.push({ path: '/pushInformation', query: { agencyId: 2 } })
+        } else if (this.pageTitles == '創泓科技Uniforce') {
+          this.$router.push({ path: '/pushInformation', query: { agencyId: 22 } })
+        }
+      }
+    },
+    // 跳转详情页
+    toSelectedArticleDetails (id) {
+      this.$router.push({ path: '/selectedArticleDetails', query: { 
+        article_id: id,
+        titleName: this.title,
+        pageTitle: this.pageTitle,
+        pageTitles: this.pageTitles,
+        type: this.type,
+        classify: this.classify,
+        class_id: this.class_id
+      } }) 
+    },
+    // 跳转列表页
+    toselectedArticleClassifications() {
+      this.$router.push({ path: '/selectedArticleClassifications', query: {
+          type: this.type,
+          classify: this.classify
+        }
+      })
+    },
+    handleCurrentChange (e) {
+      if (e === 1) {
+        this.offset = 0
+      } else {
+        // this.offset = (e - 1) * this.limit
+        this.offset = e - 1
+      }
+      window,scrollTo(0,0)
+      this.isShowLoading = true
+      this._getFeaturedArticles()
+    },
+    _getFeaturedArticles () {
+      // const { offset, limit, class_id, type, classify } = this
+      if (this.type == '0') {
+        var form = {
+          offset: this.offset * this.limit,
+          limit: this.limit,
+          class_id: this.class_id
+        }
+        systemFeaturedArticles(form, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
+        if (res.data.code !== '200') {
+          this.$message.error({
+            message: '獲取數據失敗！'
+          })
+        } else {
+          this.ClassifySafetyList = res.data.data.rows
+          this.total = res.data.data.total
+        }
+      })
+      } else {
+        var forms = {
+          offset: this.offset * this.limit,
+          limit: this.limit,
+          class_id: this.class_id,
+          type: this.type,
+          classify: this.classify
+        }
+        getArticleList(forms, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
+        // console.log(res)
+        if (res.data.code !== '200') {
+          this.$message.error({
+            message: '獲取數據失敗！'
+          })
+        } else {
+          this.ClassifySafetyList = res.data.data.rows
+          this.total = res.data.data.total
+          // console.log(this.ClassifySafetyList)
+        }
+      })
+      }
+    },
   }
 }
 </script>
@@ -210,6 +324,9 @@ export default {
               font-weight:600;
               color:rgba(37,36,39,1);
               line-height:4rem;
+              overflow: hidden;
+              text-overflow:ellipsis;
+              white-space: nowrap;
             }
             span {
               font-size:1.4rem;
@@ -225,6 +342,11 @@ export default {
             font-weight:400;
             color:rgba(134,134,134,1);
             line-height:2.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
           }
           .user {
             margin-top: 2rem;

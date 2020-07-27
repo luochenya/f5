@@ -3,9 +3,27 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="goNext(1)">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;" @click="goNext(2)">精選文章</a></el-breadcrumb-item>
-           <el-breadcrumb-item :class="{'checked': true}">{{articles.title}}</el-breadcrumb-item>
+          <el-breadcrumb-item>
+            <a v-if="this.$route.query.name == 6" @click="goNext(1)">首頁</a>
+            <a v-if="this.$route.query.name == 4" @click="goNext(1)">經銷商專區</a>
+            <a v-if="this.$route.query.name == 2 || this.$route.query.name == 3 || this.$route.query.name == 1">代理商專區</a><!-- @click="goNext(1)" -->
+            <a v-if="this.$route.query.name == 0" @click="goNext(1)">F5專區</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.name == 2">
+            <a @click="goNext(1)">逸盈科技NETFOS</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.name == 3">
+            <a @click="goNext(1)">零壹科技ZERONE</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.name == 1">
+            <a @click="goNext(1)">創泓科技Uniforce</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item>
+            <a @click="goNext(2)">精選文章</a>
+          </el-breadcrumb-item>
+           <el-breadcrumb-item :class="{'checked': true}">
+             {{articles.title}}
+          </el-breadcrumb-item>
         </el-breadcrumb>
       </div>
     </div>
@@ -21,12 +39,12 @@
             <span>發表人 {{articles.uploader}}</span>
           </div>
           <div class="tip">
-            <i class="icon-6"></i>查看234235
+            <!-- <i class="icon-6"></i>查看234235 -->
           </div>
-          <div class="time">創建於 {{articles.created_at | dateFormat}}</div>
+          <div class="time">創建於 {{articles.created_at}}</div>
         </div>
         <!-- phone -->
-        <div class="time d-md-none">創建於  {{articles.created_at | dateFormat}}</div>
+        <div class="time d-md-none">創建於  {{articles.created_at}}</div>
         <div class="user d-md-none">
           <div class="user-img">
             <div class="img">
@@ -35,13 +53,16 @@
             <span>發表人：{{articles.uploader}}</span>
           </div>
           <div class="tip">
-            <i class="icon-6"></i>查看234235
+            <!-- <i class="icon-6"></i>查看234235 -->
           </div>
         </div>
         <!-- oo -->
         <div class="img-box">
-          <img :src="`${path}${articles.imgs[0]}`" alt="" v-if="articles.imgs &&articles.imgs.length>0">
-          <img :src="`${path}${articles.imgs}`" alt="" v-else>
+          <!-- <img :src="`${path}${articles.imgs[0]}`" alt="" v-if="articles.imgs &&articles.imgs.length>0"> -->
+          <!-- <img :src="`${path}${articles.imgs}`" alt="" v-else> -->
+          <div v-for="(item, index) in articles.imgs" :key="index">
+            <img :src="`${path}${item}`" alt="">
+          </div>
         </div>
         <div class="text" v-html="articles.content">
           <!-- <p>在線應用程序今天運行世界。應用程序推動了我們的互動方式，學習方式和增長方式，數據的存放位置以及品牌，客戶和合作夥伴之間的價值交換方式。在許多方面，應用程序已成為我們的經濟，我們的政府和我們的日常生活的基礎。因此，從網絡犯罪分子的角度來看，應用程序代表著世界上最賺錢的目標，這並不奇怪，估計到2023年，在線欺詐損失每年將超過480億美元。</p>
@@ -74,7 +95,9 @@ export default {
       token: window.sessionStorage.getItem('token'),
       articles: {},
       path: this.imgs,
-      isShowLoading: true
+      isShowLoading: true,
+      typeStatus: '',
+      buttonStatus: ''
     }
   },
   mounted () {
@@ -87,49 +110,62 @@ export default {
           this.$router.push({ path: '/pushInformation' })
         } else if (this.name === 0 || this.name === '0') {
           this.$router.push({ path: '/pushInformation', query: { f5: this.name } })
-        } else if (this.name === 3 || this.name === '3' || this.name === 2 || this.name === '2') {
+        } else if (this.name == '1' || this.name == '3' || this.name == '2') {
           this.$router.push({ path: '/pushInformation', query: { agencyId: this.name } })
         } else if (this.name === 4 || this.name === '4') {
           this.$router.push({ path: '/pushInformation', query: { dealers: this.name } })
         }
       } else {
-        this.$router.push({ path: '/selectedArticlesList', query: { anewsId: this.name } })
+        this.$router.push({ path: '/selectedArticlesList', query: { newsId: this.name } })
       }
     },
     _getFeaturedArticlesRead (name, id) {
       getFeaturedArticlesRead({ article_id: id }, { headers: { token: this.token } }).then(res => {
         // console.log(res)
+        this.isShowLoading = false
         if (res.data.code !== '200') {
           this.$message.error('獲取數據失敗!')
         } else {
           this.articles = res.data.data
         }
-        this.isShowLoading = false
       })
     },
     // 上/下
-    prevNext (type) {
+    prevNext (typea) {
       this.isShowLoading = true
       let msg = ''
-      if (type === 1) {
-        msg = '已到第一頁，再跳到火星了~'
-      } else {
-        msg = '我是有底線的人~'
+      if (typea === 1) {
+        msg = '無上一篇文章'
+      } else { 
+        msg = '無下一篇文章'
       }
-      getFlipOverArticle({ flip_type: type, now_id: this.article_id }, { headers: { token: this.token } }).then(res => {
+      let types = ''
+      if (this.name == 6) {
+        types = ''
+      } else if (this.name == 0) {
+        types = 1
+      } else if (this.name == 4) {
+        types = 2
+      } else if (this.name == 22) {
+        types = 3
+      } else if (this.name == 2) {
+        types = 4
+      } else if (this.name == 3) {
+        types = 5
+      }
+      getFlipOverArticle({ flip_type: typea, now_id: this.article_id, type: types }, { headers: { token: this.token } }).then(res => {
+        this.isShowLoading = false
         if (res.data.code !== '200') {
           this.$message.error({
             message: '獲取數據失敗！',
             duration: 3000
           })
         } else if (res.data.data === undefined || res.data.data.length <= 0) {
-          this.isShowLoading = false
           this.$message.warning({
             message: msg,
             duration: 3000
           })
         } else {
-          this.isShowLoading = false
           this.articles = res.data.data
           this.article_id = res.data.data.id
           const path = this.$router.history.current.path

@@ -15,13 +15,26 @@
             <div class="card">
               <div class="card-l">
                 <p>目前累計點數</p>
-                <span>0</span>
+                <span>{{ userInfo.point }}</span>
               </div>
               <div class="card-l card-m">
                 <p>目前發文總數</p>
-                <span>0</span>
+                <span>{{ userInfo.my_article_count }}</span>
               </div>
             </div>
+          </div>
+          <div class="bottom-msg">
+            <span @click="$router.push({path:'/memberCenter'})">會員資料修改</span>
+            <div></div>
+            <span class="bottom-msg-active">我發表的文章<i class="icon-9"></i></span>
+            <div></div>
+            <span @click="$router.push({path:'/PointsApplication'})">點數申請</span>
+            <div></div>
+            <span @click="$router.push({path:'/PointsRecord'})">點數記錄</span>
+            <div></div>
+            <span @click="$router.push({path:'/MallOrder'})">商城訂單查詢</span>
+            <div></div>
+            <span @click="$router.push({path:'/notificationCenter'})">通知中心</span>
           </div>
         </div>
         <div class="item-r">
@@ -72,7 +85,7 @@
             </div>
             <div class="btn">
               <span @click="toClear">清除</span>
-              <a href="javascript:;" @click="theQuery">查詢</a>
+              <a @click="_setMyArticle">查詢</a>
             </div>
           </div>
           <div class="taba">
@@ -84,7 +97,7 @@
                 :class="{active : ( isActive == item.value ? true : false )}"
                 @click="tabaIsShow(item.value)"
                 >
-                <a href="javascript:;">{{item.name}}</a>
+                <a>{{item.name}}</a>
               </li>
             </ul>
             <div class="line"></div>
@@ -93,7 +106,7 @@
                 <div class="prompt" v-if="ArticlesList.length<=0">暫無文章記錄</div>
                 <ul v-else>
                   <li v-for="(item,index) in ArticlesList" :key="index">
-                    <div class="left-box">
+                    <div class="left-box" @click="examineClick(item.id, item.is_pass, item.class_id)">
                        <span :class="{'bg-img' : item.is_pass=='1'}"></span>
                        <div class="text">
                         <h1 :class="{'title-color' : item.is_pass == '1'}">{{item.title}}</h1>
@@ -120,7 +133,7 @@
                 <div class="prompt" v-if="ArticlesList.length<=0">暫無文章記錄</div>
                 <ul v-else>
                   <li v-for="(item,index) in ArticlesList" :key="index">
-                    <div class="left-box">
+                    <div class="left-box" @click="examineClick(item.id, item.is_pass, item.class_id)">
                        <span></span>
                        <div class="text">
                         <h1>{{item.title}}</h1>
@@ -144,7 +157,7 @@
                 <div class="prompt" v-if="ArticlesList.length<=0">暫無文章記錄</div>
                 <ul v-else>
                   <li v-for="(item,index) in ArticlesList" :key="index">
-                    <div class="left-box">
+                    <div class="left-box" @click="examineClick(item.id, item.is_pass, item.class_id)">
                         <span :class="{'bg-img' : item.is_pass=='1'}"></span>
                        <div class="text">
                         <h1 :class="{'title-color' : item.is_pass == '1'}">{{item.title}}</h1>
@@ -168,7 +181,7 @@
                 <div class="prompt" v-if="ArticlesList.length<=0">暫無文章記錄</div>
                 <ul v-else>
                   <li v-for="(item,index) in ArticlesList" :key="index">
-                    <div class="left-box">
+                    <div class="left-box" @click="examineClick(item.id, item.is_pass, item.class_id)">
                        <span></span>
                        <div class="text">
                         <h1>{{item.title}}</h1>
@@ -192,7 +205,7 @@
                 <div class="prompt" v-if="ArticlesList.length<=0">暫無文章記錄</div>
                 <ul v-else>
                   <li v-for="(item,index) in ArticlesList" :key="index">
-                    <div class="left-box">
+                    <div class="left-box" @click="examineClick(item.id, item.is_pass, item.class_id)">
                        <span></span>
                        <div class="text">
                         <h1>{{item.title}}</h1>
@@ -245,7 +258,7 @@ export default {
   },
   data () {
     return {
-      isShowModal: true,
+      isShowModal: false,
       isModal: false,
       userInfo: storage.getItem('userInfo'),
       isActive: '4',
@@ -298,7 +311,7 @@ export default {
       },
       ArticlesList: [],
       offset: 0,
-      limit: 4,
+      limit: 10,
       is_pass: '',
       token: window.sessionStorage.getItem('token'),
       total: 0,
@@ -308,16 +321,16 @@ export default {
   },
   computed: {
     getStatusName: function () {
-      // 状态0已送审1已发布2未通过3草稿（为空是查出全部，注：0不是空）
+      // 状态0已送審1已發佈2未通過3草稿（为空是查出全部，注：0不是空）
       return function (status) {
         if (status === '0') {
-          return '已送审'
+          return '已送審'
         } else if (status === '1') {
-          return '已发布'
+          return '已發佈'
         } else if (status === '2') {
-          return '未通过'
-        } else if (status === '3') {
-          return '草稿'
+          return '未通過'
+        // } else if (status === '3') {
+        //   return '草稿'
         }
       }
     }
@@ -326,6 +339,14 @@ export default {
     this._setMyArticle()
   },
   methods: {
+    // 查看
+    examineClick (id, isPass, class_id) {
+      if (isPass === '3' || isPass === 3) {
+        this.$router.push({ path: '/publishedAnArticle', query: { article_id: id } })
+      } else {
+        this.$router.push({ path: '/selectedArticleDetails', query: { article_id: id, types: "2", class_id: class_id } })
+      }
+    },
     tabaIsShow (type) {
       this.isActive = type
       this.offset = 0
@@ -349,14 +370,19 @@ export default {
       }
     },
     _setMyArticle () {
-      // eslint-disable-next-line camelcase
-      const { offset, limit, is_pass } = this
-      setMyArticle({ offset, limit, is_pass }, { headers: { token: this.token } }).then(res => {
-        // console.log(res, '333')
+      const c_time = `${this.form.value1}~${this.form.value2}`
+      var form = {
+        offset: this.offset * this.limit,
+        limit: this.limit,
+        is_pass: this.form.selectCode,
+        c_time: c_time
+      }
+      this.isShowModal = true
+      setMyArticle(form, { headers: { token: this.token } }).then(res => {
+        this.isShowModal = false
         if (res.data.code === '200') {
           this.total = res.data.data.total
           this.ArticlesList = res.data.data.rows
-          this.isShowModal = false
         }
       })
     },
@@ -364,49 +390,54 @@ export default {
       if (e === 1) {
         this.offset = 0
       } else {
-        this.offset = (e - 1) * this.limit
+        // this.offset = (e - 1) * this.limit
+        this.offset = e - 1
       }
-      this.isShowModal = true
+      window,scrollTo(0,0)
       this._setMyArticle()
     },
-    theQuery () {
-      const { value1, value2, selectCode } = this.form
-      let errMsg = ''
-      if (!value1) {
-        errMsg = '請選擇起始時間'
-      } else if (!value2) {
-        errMsg = '請選擇結束時間'
-      } else if (!selectCode) {
-        errMsg = '請選擇狀態'
-      }
-      if (errMsg) {
-        this.$message.error(errMsg)
-        return
-      }
-      this.is_pass = selectCode
-      // eslint-disable-next-line camelcase
-      const c_time = `${value1}~${value2}`
-      this.offset = 0
-      this.limit = 4
-      // eslint-disable-next-line camelcase
-      const { offset, limit, is_pass } = this
-      // console.log(is_pass, c_time, this.token)
-      this.isShowModal = true
-      setMyArticle({ offset, limit, is_pass, c_time }, { headers: { token: this.token } }).then(res => {
-        // console.log(res)
-        if (res.data.code === '200') {
-          this.total = res.data.data.total
-          this.ArticlesList = res.data.data.rows
-          this.isActive = this.is_pass
-          this.isShowModal = false
-        }
-      })
-    },
+    // theQuery () {
+    //   const { value1, value2, selectCode } = this.form
+    //   // let errMsg = ''
+    //   // if (!value1) {
+    //   //   errMsg = '請選擇起始時間'
+    //   // } else if (!value2) {
+    //   //   errMsg = '請選擇結束時間'
+    //   // } else if (!selectCode) {
+    //   //   errMsg = '請選擇狀態'
+    //   // }
+    //   // if (errMsg) {
+    //   //   this.$message.error(errMsg)
+    //   //   return
+    //   // }
+    //   this.is_pass = selectCode
+    //   // eslint-disable-next-line camelcase
+    //   const c_time = `${value1}~${value2}`
+    //   this.offset = 0
+    //   this.limit = 4
+    //   // eslint-disable-next-line camelcase
+    //   const { offset, limit, is_pass } = this
+    //   // console.log(is_pass, c_time, this.token)
+    //   this.isShowModal = true
+    //   setMyArticle({ offset, limit, is_pass, c_time }, { headers: { token: this.token } }).then(res => {
+    //     // console.log(res)
+    //       this.isShowModal = false
+    //     if (res.data.code === '200') {
+    //       this.total = res.data.data.total
+    //       this.ArticlesList = res.data.data.rows
+    //       this.isActive = this.is_pass
+    //     }
+    //   })
+    // },
     toClear () {
-      this.form = {}
+      this.form = {
+        value1: '',
+        value2: '',
+        selectCode: ''
+      }
       this.isActive = '4'
       this.is_pass = ''
-      this.isShowModal = true
+      this.offset = 0
       this._setMyArticle()
     },
     deleteArticles (id) {
@@ -517,6 +548,35 @@ export default {
           }
         }
       }
+      .bottom-msg {
+        margin-top: 1rem;
+        text-align: center;
+        padding: 0 1.9rem 0;
+        background:rgba(255,255,255,1);
+        border-radius:.6rem;
+        span {
+          padding: 1.9rem 0 1.9rem;
+          display: inline-block;
+          font-size:1.6rem;
+          font-weight:400;
+          color:rgba(134,134,134,1);
+          cursor: pointer;
+          line-height:2.2rem;
+        }
+        .bottom-msg-active {
+          position: relative;
+          color:rgba(37,36,39,1);
+          .icon-9 {
+            position: absolute;
+            line-height:2.2rem;
+            right: -2.5rem;
+          }
+        }
+        div {
+          height:.1rem;
+          background:rgba(240,240,240,1);
+        }
+      }
     }
     .item-r {
       flex: 1;
@@ -586,12 +646,12 @@ export default {
             background:rgba(37,36,39,1);
             border-radius:.1rem;
           }
-          /deep/.el-date-editor.el-input, .el-date-editor.el-input__inner {
+          .el-date-editor.el-input, .el-date-editor.el-input__inner {
             width:11.9rem;
             height: 4rem;
 
           }
-          /deep/ .el-input__inner  {
+           .el-input__inner  {
             padding-left: 2rem;
             padding-right: 0;
             border: none;
@@ -599,7 +659,7 @@ export default {
             font-weight:400;
             color:rgba(210,210,210,1);
           }
-          /deep/ .el-input__icon {
+           .el-input__icon {
             display: none;
             width: 0;
           }
@@ -611,7 +671,7 @@ export default {
               display: block;
               margin-bottom: .6rem;
             }
-            /deep/ .el-input__inner {
+             .el-input__inner {
               width:18.7rem;
               height:4.4rem;
               background:rgba(255,255,255,1);
@@ -619,7 +679,7 @@ export default {
               border:.1rem solid rgba(61,61,61,1);
               padding-left: 2rem;
             }
-            /deep/ .el-select .el-input .el-select__caret  {
+             .el-select .el-input .el-select__caret  {
               margin-right: 2rem;
               color: #3D3D3D;
               font-size: 1.6rem;
@@ -700,6 +760,7 @@ export default {
           border-bottom: .1rem solid rgba(247,248,250,1);
 
           .left-box {
+            cursor: pointer;
             display: flex;
             span {
               @include bgImg(5rem,5rem,'./../assets/imgs/icon/icon-articles-2.png');
@@ -742,7 +803,7 @@ export default {
               border-radius:.6rem;
               color: #fff;
               padding: .5rem 1rem;
-              margin-right: 1.5rem;
+              // margin-right: 1.5rem;
               cursor: pointer;
             }
           }
@@ -750,6 +811,7 @@ export default {
             font-size:1.6rem;
             font-weight:400;
             line-height:2.2rem;
+            cursor: pointer;
           }
           .color-1 {
             color:rgba(0,106,255,1);
@@ -788,7 +850,7 @@ export default {
           .right-box {
             margin-left: 2rem;
             .item-l {
-              /deep/ .el-input__inner {
+               .el-input__inner {
                 width:14.7rem;
               }
             }
@@ -815,10 +877,10 @@ export default {
         }
         .pagination {
           .container {
-            /deep/ .el-pagination.is-background .btn-prev{
+             .el-pagination.is-background .btn-prev{
               margin-right: 1.6rem!important;
             }
-            /deep/ .el-pagination .el-pager li {
+             .el-pagination .el-pager li {
               margin-right: 1.6rem!important;
             }
           }
@@ -837,6 +899,12 @@ export default {
       padding:1.5rem;
       flex-wrap: wrap;
       width: 100%;
+      .item-r {
+        overflow-x: auto;
+        .taba .tabas li {
+          flex: auto;
+        }
+      }
      .item-left {
         width: 100%;
         flex: 0 0 100%;

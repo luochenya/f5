@@ -11,9 +11,9 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="$router.push('/')">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">我的</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">歷程記錄</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('/')">首頁</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('projectRegistration')">我的</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.go(-1)">歷程記錄</a></el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -27,7 +27,7 @@
         <div class="main">
           <div class="main-item">
              <h2>A.客戶及專案資訊</h2>
-             <p>客戶信息</p>
+             <p>客戶訊息</p>
              <div class="card-box">
                 <div class="card">
                   <span></span>
@@ -54,8 +54,13 @@
                   <div class="name">承辦人</div>
                   <div class="text">{{prpjectDetail.undertaker}}</div>
                 </div>
+                <div class="card">
+                  <span></span>
+                  <div class="name">承辦人電話(M)</div>
+                  <div class="text" v-if="unker_phone">{{unker_phone[1]}}</div>
+                </div>
              </div>
-             <p>客戶信息</p>
+             <p>客戶訊息</p>
              <div class="card-box">
                 <div class="card">
                   <span></span>
@@ -87,23 +92,33 @@
                   <div class="name">承辦人E-mail</div>
                   <div class="text">{{prpjectDetail.unker_email}}</div>
                 </div>
+                <div class="card">
+                  <span></span>
+                  <div class="name">競爭廠商(原廠)</div>
+                  <div class="text">{{prpjectDetail.comp_manu_original}}</div>
+                </div>
+                <div class="card">
+                  <span></span>
+                  <div class="name">競爭廠商(經銷商)</div>
+                  <div class="text">{{prpjectDetail.comp_manu_dealer}}</div>
+                </div>
              </div>
              <div class="link"></div>
             <h2 class="main-b-title">B.產品方案資訊</h2>
             <div class="main-b" v-for="(item,index) in product_program" :key='index'>
-              <div class="title"><span></span>客戶信息</div>
+              <div class="title"><span></span>產品型號</div>
               <div class="card-box">
                 <div class="card">
                   <div class="name">產品</div>
-                  <div class="text">{{item.product_type_name}}</div>
+                  <div class="text">{{item.product_type}}</div>
                 </div>
                 <div class="card">
                   <div class="name">數量</div>
-                  <div class="text">{{item.product_type_mum}}</div>
+                  <div class="text">{{item.product_type_num}}</div>
                 </div>
               </div>
-              <div class="title"><span></span>客戶信息</div>
-              <p>Advanced Web Application Firewall (WAF)</p>
+              <div class="title"><span></span>產品模組</div>
+              <p v-for="(items, index) in item.product_module" :key="index">{{ items }}</p>
             </div>
             <div class="link"></div>
             <h2>C.經銷商資訊</h2>
@@ -127,7 +142,7 @@
               <div class="card">
                 <span></span>
                 <div class="name">報備日期</div>
-                <div class="text">{{prpjectDetail.business_name}}</div>
+                <div class="text">{{prpjectDetail.report_date}}</div>
               </div>
               <div class="card">
                 <span></span>
@@ -145,12 +160,12 @@
             <div class="card-box-d">
               <div class="card">
                 <div class="name">代理商公司</div>
-                <el-select v-model="prpjectDetail.agent_company" placeholder="二三科技有限公司" disabled>
+                <el-select v-model="prpjectDetail.agent_company" placeholder="" disabled>
                 </el-select>
               </div>
               <div class="card">
-                <div class="name">代理商業務</div>
-                <el-select v-model="prpjectDetail.agent_business" placeholder="陳二" disabled></el-select>
+                <div class="name">代理商產品經理</div>
+                <el-select v-model="prpjectDetail.agent_business" placeholder="" disabled></el-select>
               </div>
             </div>
             <div class="card-box-e">
@@ -158,39 +173,46 @@
               <div class="card-item">
                 <div class="card">
                   <div class="title">1.已向客戶進行方案簡報?</div>
-                  <div class="card-d">{{project_config_progress_that[0]}}</div>
+                  <div class="card-d">{{project_config_progress_that[0] ? project_config_progress_that[0] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">2.已提供/建議 產品 or 方案給客戶?</div>
-                  <div class="card-d">{{project_config_progress_that[1]}}</div>
+                  <div class="card-d">{{project_config_progress_that[1] ? project_config_progress_that[1] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">3.須進行PoC驗證?</div>
-                  <div class="card-d">{{project_config_progress_that[2]}}</div>
+                  <div class="card-d">{{project_config_progress_that[2] ? project_config_progress_that[2] : 'NONE'}}</div>
                 </div>
                 <div class="card">
-                  <div class="title">4.預估進行PoC之日常?</div>
-                  <div class="card-d">{{project_config_progress_that[3]}}</div>
+                  <div class="title">4.預估進行PoC之日期?</div>
+                  <div class="card-d">{{project_config_progress_that[3] ? project_config_progress_that[3] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">5.是否需要開立原廠保固授權說明?</div>
-                  <div class="card-d">{{project_config_progress_that[4]}}</div>
+                  <div class="card-d">{{project_config_progress_that[4] ? project_config_progress_that[4] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">6.決標方式? (價格標/評選標/資格標.....等)</div>
-                  <div class="card-d">{{project_config_progress_that[5]}}</div>
+                  <div class="card-d">{{project_config_progress_that[5] ? project_config_progress_that[5] : 'NONE'}}</div>
                 </div>
                 <div class="card">
                   <div class="title">7.競爭對手狀態說明</div>
-                  <div class="card-d">{{project_config_progress_that[6]}}</div>
+                  <div class="card-d">{{project_config_progress_that[6] ? project_config_progress_that[6] : 'NONE'}}</div>
                 </div>
               </div>
             </div>
             <div class="card-box-f">
               <h2>F.需要F5支援項目</h2>
               <div class="text">
-               {{prpjectDetail.five_support_project}}
+                {{prpjectDetail.five_support_project ? prpjectDetail.five_support_project : 'NONE'}}
+              </div>
             </div>
+            <div class="card-box" v-if="prpjectDetail.dr_id" style="margin-top: 10.5rem">
+              <div class="card">
+                <span></span>
+                <div class="name">DR ID</div>
+                <div class="text">{{prpjectDetail.dr_id}}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -220,13 +242,11 @@ export default {
     }
   },
   mounted () {
-    console.log(this.project_id)
     this._getProjectRead()
   },
   methods: {
     _getProjectRead () {
       getProjectRead({ project_id: this.project_id }, { headers: { token: this.token } }).then(res => {
-        console.log(res)
         if (res.data.code !== '200') {
           this.$message.error('獲取數據失敗！')
         } else {
@@ -234,8 +254,6 @@ export default {
           this.product_program = JSON.parse(res.data.data.product_program)
           this.unker_phone = JSON.parse(res.data.data.unker_phone)
           this.project_config_progress_that = JSON.parse(res.data.data.project_config_progress_that)
-          console.log(this.prpjectDetail)
-          console.log(this.unker_phone)
         }
       })
     }
@@ -443,7 +461,7 @@ export default {
               margin-bottom: 1rem;
             }
             .card-d {
-              padding: 1.4rem 4.6rem 2.2rem 3rem;
+              padding: 1.4rem 4.6rem 1.4rem 3rem;
               background:rgba(245,246,247,1);
               border-radius:.4rem;
               border:.1rem solid rgba(239,239,239,1);

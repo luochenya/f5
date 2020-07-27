@@ -18,7 +18,7 @@
             <textarea placeholder="請由此填寫（非必填）"  v-model="projectThat[2]"></textarea>
           </div>
           <div class="card">
-            <span>4.預估進行PoC之日常?</span>
+            <span>4.預估進行PoC之日期?</span>
             <textarea placeholder="請由此填寫（非必填）"  v-model="projectThat[3]"></textarea>
           </div>
           <div class="card">
@@ -43,8 +43,8 @@
           </div>
       </div>
       <div class="btn">
-        <a href="javascript:;" @click="$emit('prev')">上一步</a>
-        <a href="javascript:;" class="btnColor" @click="next">填寫完成</a>
+        <a @click="$emit('prev')">上一步</a>
+        <a class="btnColor" @click="next">填寫完成</a>
       </div>
     </div>
   </div>
@@ -137,6 +137,22 @@ export default {
             font-weight:400;
             color:rgba(189,189,189,1);
             line-height:2.2rem;
+          }
+          textarea::-webkit-input-placeholder {
+              /* WebKit browsers */
+              color: #9e9e9e;
+          }
+          textarea:-moz-placeholder {
+              /* Mozilla Firefox 4 to 18 */
+              color: #9e9e9e;
+          }
+          textarea::-moz-placeholder {
+              /* Mozilla Firefox 19+ */
+              color: #9e9e9e;
+          }
+          textarea::-ms-input-placeholder {
+              /* Internet Explorer 10+ */
+              color: #9e9e9e;
           }
         }
 

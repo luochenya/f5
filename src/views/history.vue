@@ -11,9 +11,9 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="$router.push('/')">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">我的</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">專案審核</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('/')">首頁</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('projectReview')">我的</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('projectReview')">專案審核</a></el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -27,17 +27,24 @@
         <div class="steps">
           <div class="item" v-for="(item,index) in historyList" :key="index">
             <div class="item-top">
-              <div class="tip" :class="{'tip-bg-1':item.check_state == '2','tip-bg-2': item.check_state == '3','tip-bg-3':item.check_state == '1'}"><span></span></div>
-              <div class="time">{{item.created_at |dateFormats}}</div>
+              <div class="tip" :class="{'tip-bg-1':item.check_state == '1','tip-bg-2': item.check_state == '2','tip-bg-3':item.check_state == '3'}"><span></span></div>
+              <div class="time">{{item.created_at}}</div>
             </div>
             <div class="item-box">
               <div class="main">
                 <div class="top">
                   <div class="user">
-                    <img v-if="item.user_head" :src="`${path}${item.user_head}`" alt="">
-                    <img v-else src="./../assets/imgs/head-portrait.svg" alt="">
-                    <h3>{{item.nick_name}}</h3>
-                    <span  :class="{'bg-1': item.check_state == '2','bg-2':item.check_state== '3','bg-3': item.check_state == '1'}">{{passType(item.check_state)}}</span>
+                    <!-- <img v-if="item.user_head" :src="`${path}${item.user_head}`" alt="">
+                    <img v-else src="./../assets/imgs/head-portrait.svg" alt=""> -->
+                    <img src="./../assets/imgs/safety-user.png" alt="">
+                    <div>
+                      <h3>{{item.nick_name}}</h3>
+                      <span  :class="{'bg-1': item.check_state == '1','bg-2':item.check_state== '2','bg-3': item.check_state == '3'}">{{passType(item.check_state)}}</span>
+                      <div>
+                        <h4>{{item.audit_name}}</h4>
+                        <h5>{{item.agent_company}}</h5>
+                      </div>
+                    </div>
                   </div>
                   <div class="btn" @click="$router.push({path:'/projectReviewDetails',query:{project_id:item.project_id}})">
                     詳細資料
@@ -70,11 +77,11 @@ export default {
     passType () {
       return (type) => {
         if (type === '1') {
-          return '审核中'
+          return '審核通過'
         } else if (type === '2') {
-          return '审核通过'
+          return '審核不通過'
         } else {
-          return '审核不通过'
+          return '審核中'
         }
       }
     }
@@ -83,14 +90,22 @@ export default {
     this._getAuditLogging()
   },
   methods: {
+    timeFun(originVal) {
+      const dt = new Date(originVal)
+      const y = dt.getFullYear()
+      const m = (dt.getMonth() + 1 + '').padStart(2, '0')
+      const d = (dt.getDate() + '').padStart(2, '0')
+      const hh = (dt.getHours() + '').padStart(2, '0')
+      const mm = (dt.getMinutes() + '').padStart(2, '0')
+      const ss = (dt.getSeconds() + '').padStart(2, '0')
+      return `${y}年${m}月${d}日 ${hh}:${mm}:${ss}`
+    },
     _getAuditLogging () {
       getAuditLogging({ project_id: this.project_id }, { headers: { token: this.token } }).then(res => {
-        console.log(res, '22')
         if (res.data.code !== '200') {
           this.$message.error('獲取數據失敗！')
         } else {
           this.historyList = res.data.data.rows
-          console.log(this.historyList)
         }
       })
     }
@@ -207,6 +222,22 @@ export default {
                   margin-right: 1.2rem;
                 }
                 h3 {
+                  display: inline-block;
+                  font-size:1.6rem;
+                  font-weight:600;
+                  color:rgba(37,36,39,1);
+                  line-height:2.3rem;
+                }
+                h4 {
+                  display: inline-block;
+                  font-size:1.6rem;
+                  font-weight:600;
+                  color:rgba(37,36,39,1);
+                  line-height:2.3rem;
+                }
+                h5 {
+                  margin-left: 1.4rem;
+                  display: inline-block;
                   font-size:1.6rem;
                   font-weight:600;
                   color:rgba(37,36,39,1);
@@ -218,7 +249,6 @@ export default {
                   height:1.7rem;
                   margin-left: 1.4rem;
                   display: inline-block;
-                  @include flex(center);
                   border-radius:.2rem;
                   font-size:.9rem;
                   font-weight:600;

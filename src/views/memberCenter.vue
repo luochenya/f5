@@ -27,18 +27,26 @@
             <div class="card">
               <div class="card-l">
                 <p>目前累計點數</p>
-                <span>0</span>
+                <span>{{ userInfo.point }}</span>
               </div>
               <div class="card-l card-m">
                 <p>目前發文總數</p>
-                <span>0</span>
+                <span>{{ userInfo.my_article_count }}</span>
               </div>
             </div>
           </div>
           <div class="bottom-msg">
-            <span>會員資料修改<i class="icon-9"></i></span>
+            <span class="bottom-msg-active">會員資料修改<i class="icon-9"></i></span>
             <div></div>
             <span @click="$router.push({path:'/myPublishedArticles'})">我發表的文章</span>
+            <div></div>
+            <span @click="$router.push({path:'/PointsApplication'})">點數申請</span>
+            <div></div>
+            <span @click="$router.push({path:'/PointsRecord'})">點數記錄</span>
+            <div></div>
+            <span @click="$router.push({path:'/MallOrder'})">商城訂單查詢</span>
+            <div></div>
+            <span @click="$router.push({path:'/notificationCenter'})">通知中心</span>
           </div>
         </div>
         <div class="item-r">
@@ -97,7 +105,8 @@
                 </div>
               </div>
               <div class="form-tip">
-                <h3 v-if="userInfo">帳號：{{userInfo.accounts}}</h3><a href="javascript:;" @click="istoModal">修改登入密碼</a>
+                <h3 v-if="userInfo">帳號：{{userInfo.accounts}}</h3>
+                <a v-if="userInfo.accounts" @click="istoModal">修改登入密碼</a>
               </div>
               <div class="form-btn" @click="modifyThe">儲存修改</div>
             </div>
@@ -108,6 +117,7 @@
     <resetas-psword-modal
       :showModal="isResetasPswordModal"
       @isShowModal="submit"
+      @showModalClick="showModalClick"
       ></resetas-psword-modal>
       <modal
         :showModal = "isShowModal"
@@ -186,8 +196,13 @@ export default {
   mounted () {
     // this.userInfo = storage.getItem('userInfo')
     this.token = window.sessionStorage.getItem('token')
+    this._getUserInfo()
   },
   methods: {
+    showModalClick() {
+      this.canScroll()
+      this.isResetasPswordModal = false
+    },
     uploadImg (file) {
       const isJPG = 'jpg,gif,png'
       const name = file.file.name.split('.')
@@ -211,11 +226,10 @@ export default {
       }
       this.isShowLoading = true
       uploadPicture(UploadData, config).then(res => {
-        console.log(res, 't')
+        this.isShowLoading = false
         if (res.data.code === '200') {
           this.imageUrl = this.path + res.data.data.path
           this.imgs = res.data.data.path
-          this.isShowLoading = false
         }
       })
     },
@@ -225,13 +239,16 @@ export default {
     },
     submit () {
       this.isResetasPswordModal = false
+      this.canScroll()
       this.isShowModal = true
     },
     isNoModal () {
       this.isShowModal = false
       this.canScroll()
       this.$router.push('/login')
-      window.sessionStorage.clear()
+      // window.sessionStorage.clear()
+      window.sessionStorage.removeItem('f5')
+      window.sessionStorage.removeItem('token')
     },
     changeIpt (type) {
       if (type === 'company_name') {
@@ -299,6 +316,17 @@ export default {
         }
       })
     },
+    // 获取个人信息
+    _getUserInfo () {
+      this.isShowLoading = true
+      getUserInfo({ headers: { token: this.token } }).then(res => {
+        this.isShowLoading = false
+        if (res.data.code === '200') {
+          this.form = res.data.data
+          this.imgs = res.data.data.user_head
+        }
+      })
+    },
     // 存儲修改
     modifyThe () {
       for (const item in this.prop) {
@@ -319,7 +347,6 @@ export default {
           user_head: this.imgs
         }
         setUserInfo(form, { headers: { token: this.token } }).then(res => {
-          console.log('66', res)
           if (res.data.code !== '200') {
             this.$message({
               duration: '2000',
@@ -329,16 +356,16 @@ export default {
           } else {
             this.$message({
               duration: '2000',
-              message: res.data.msg,
+              message: '設定成功',
               type: 'success'
             })
             this.form = {}
             this.imgs = ''
             getUserInfo({ headers: { token: this.token } }).then(res => {
-              console.log('66', res)
               if (res.data.code === '200') {
                 storage.setItem('userInfo', res.data.data)
                 this.userInfo = res.data.data
+                this.form = res.data.data
               }
             })
           }
@@ -379,7 +406,9 @@ export default {
             height: 100%;
           }
           img {
-            width: 100%;
+            width: 10rem;
+            height: 10rem;
+            border-radius: 50%;
           }
         }
         h3 {
@@ -457,7 +486,7 @@ export default {
           cursor: pointer;
           line-height:2.2rem;
         }
-        span:first-child {
+        .bottom-msg-active {
           position: relative;
           color:rgba(37,36,39,1);
           .icon-9 {
@@ -639,6 +668,7 @@ export default {
         margin-bottom: 1rem;
       }
       .item-r {
+        width: 100%;
         padding: 4rem 1.5rem 0;
         .form {
           width: 100%;
@@ -648,6 +678,9 @@ export default {
               label {
                 display: flex;
                 width: 100%;
+                span {
+                  font-size: 1.3rem;
+                }
                 input {
                   width: 20.1rem;
                 }

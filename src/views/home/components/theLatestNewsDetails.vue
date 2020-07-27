@@ -3,8 +3,22 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="goNext(1)">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;" @click="goNext(2)">最新消息</a></el-breadcrumb-item>
+          <el-breadcrumb-item>
+            <a v-if="this.$route.query.name == 6" @click="goNext(1)">首頁</a>
+            <a v-if="this.$route.query.name == 4" @click="goNext(1)">經銷商專區</a>
+            <a v-if="this.$route.query.name == 2 || this.$route.query.name == 3 || this.$route.query.name == 1">代理商專區</a><!-- @click="goNext(1)" -->
+            <a v-if="this.$route.query.name == 0" @click="goNext(1)">F5專區</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.name == 2">
+            <a @click="goNext(1)">逸盈科技NETFOS</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.name == 3">
+            <a @click="goNext(1)">零壹科技ZERONE</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.name == 1">
+            <a @click="goNext(1)">創泓科技Uniforce</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="goNext(2)">最新消息</a></el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': true}">{{newsRead.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -13,33 +27,33 @@
       <div class="container">
         <h1>{{newsRead.title}}</h1>
         <div class="user dmax-md-none">
-          <div class="user-img">
+          <!-- <div class="user-img">
             <div class="img">
               <img src="./../../../assets/imgs/safety-user.png" alt="">
             </div>
-            <span>發表人：郭子君</span>
-          </div>
-          <div class="tip">
+            <span>發表人：{{ newsRead.id }}</span>
+          </div> -->
+          <!-- <div class="tip">
             <i class="icon-6"></i>查看234235
-          </div>
-          <div class="time">創建於 {{newsRead.created_at |dateFormat}}</div>
+          </div> -->
+          <div class="time">創建於 {{newsRead.created_at}}</div>
         </div>
         <!-- phone -->
-        <div class="time d-md-none">創建於 {{newsRead.created_at | dateFormat}}</div>
+        <div class="time d-md-none">創建於 {{newsRead.created_at}}</div>
         <div class="user d-md-none">
-          <div class="user-img">
+          <!-- <div class="user-img">
             <div class="img">
               <img src="./../../../assets/imgs/safety-user.png" alt="">
             </div>
-            <span>發表人：郭子君</span>
-          </div>
-          <div class="tip">
+            <span>發表人：{{ newsRead.id }}</span>
+          </div> -->
+          <!-- <div class="tip">
             <i class="icon-6"></i>查看234235
-          </div>
+          </div> -->
         </div>
         <!-- oo -->
-        <div class="text">
-          {{newsRead.content}}
+        <div class="text" v-html="newsRead.content">
+          <!-- {{newsRead.content}} -->
           <!-- <p>在線應用程序今天運行世界。應用程序推動了我們的互動方式，學習方式和增長方式，數據的存放位置以及品牌，客戶和合作夥伴之間的價值交換方式。在許多方面，應用程序已成為我們的經濟，我們的政府和我們的日常生活的基礎。因此，從網絡犯罪分子的角度來看，應用程序代表著世界上最賺錢的目標，這並不奇怪，估計到2023年，在線欺詐損失每年將超過480億美元。</p>
           <p>F5和Shape正在聯手改變我們保護全球應用程序的方式。我們對此主題有獨特的見解：我們認為服務，交付和啟用應用程序的平台最適合防禦這些應用程序，尤其是隨著攻擊者軍備競賽的不斷升級。作為NGINX和Shape的母公司，F5定位為成為世界上最重要的應用程序支持者，並且最適合增強和增強全球組織的應用程序安全性。 </p>
           <p>我們對應用程序安全性轉型的願景是什麼樣的？簡單來說：</p>
@@ -50,8 +64,8 @@
           <p>公共雲是我們戰略的重要組成部分。世界上一些領先的銀行，航空公司，零售商以及其他一些公司已經依靠F5 + NGINX + Shape交付和保護在公共雲環境中運行的應用程序。公共雲是現代應用程序開發的支柱之一，它提供了諸如計算資源，內容交付，數據存儲和其他必需服務之類的功能，這些功能以前需要來自不同供應商的解決方案。F5的代碼對客戶解決方案集（包括NGINX和Shape）對公共雲進行了補充，並支持混合雲和多雲應用方案。因此，開發人員可以將F5當作強大的抽象層，而無論他們的應用程序現在或將來位於何處。 </p> -->
         </div>
         <div class="btn">
-          <div class="item" @click="prevNext(1)"><i class="icon-5"></i>上一篇文章</div>
-          <div class="item item-2" @click="prevNext(2)">下一篇文章<i class="icon-3"></i></div>
+          <div class="item" @click="prevNext(1)"><i class="icon-5"></i>上一篇</div>
+          <div class="item item-2" @click="prevNext(2)">下一篇<i class="icon-3"></i></div>
         </div>
       </div>
     </div>
@@ -90,19 +104,20 @@ export default {
           this.$router.push({ path: '/pushInformation' })
         } else if (this.name === 0 || this.name === '0') {
           this.$router.push({ path: '/pushInformation', query: { f5: this.name } })
-        } else if (this.name === 3 || this.name === '3' || this.name === 2 || this.name === '2') {
+        } else if (this.name == '3' || this.name == '2' || this.name == '1') {
           this.$router.push({ path: '/pushInformation', query: { agencyId: this.name } })
         } else if (this.name === 4 || this.name === '4') {
           this.$router.push({ path: '/pushInformation', query: { dealers: this.name } })
         }
       } else {
-        this.$router.push({ path: '/theLatestNews', query: { agencyId: this.name } })
+        this.$router.push({ path: '/theLatestNews', query: { newsId: this.name } })
       }
     },
     _newsFiveNewsRead (name, id) {
       if (this.name === '6' || this.name === 6) {
-        getHomeNewsRead({ news_id: id }, { headers: { token: this.token } }).then(res => {
+        getHomeNewsRead({ news_id: this.news_id }, { headers: { token: this.token } }).then(res => {
           // console.log(res, '6')
+          this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
@@ -110,45 +125,41 @@ export default {
           } else {
             this.newsRead = res.data.data
           }
-          this.isShowLoading = false
         })
       } else if (this.name === '0' || this.name === 0) {
         // f5
-        newsFiveNewsRead({ news_id: id }, { headers: { token: this.token } }).then(res => {
-          console.log(res, '0')
+        getHomeNewsRead({ news_id: this.news_id }, { headers: { token: this.token } }).then(res => {
+            this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
             })
           } else {
             this.newsRead = res.data.data
-            this.isShowLoading = false
           }
         })
-      } else if (this.name === '3' || this.name === 3 || this.name === 2 || this.name === '2') {
+      } else if (this.name === '3' || this.name === 3 || this.name === 2 || this.name === '2' || this.name === 1 || this.name === '1') {
         // 代理
         getAgentNewsRead({ classify: this.name, news_id: this.news_id }, { headers: { token: this.token } }).then(res => {
-          console.log(res, this.name)
+            this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
             })
           } else {
             this.newsRead = res.data.data
-            this.isShowLoading = false
           }
         })
       } else if (this.name === '4' || this.name === 4) {
         // 經銷商
         getDealerNewsRead({ news_id: this.news_id }, { headers: { token: this.token } }).then(res => {
-          console.log(res, this.name)
+            this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
             })
           } else {
             this.newsRead = res.data.data
-            this.isShowLoading = false
           }
         })
       }
@@ -157,50 +168,52 @@ export default {
     prevNext (Type) {
       // console.log(Type)
       this.isShowLoading = true
-      if (this.name === '6' || this.name === 6) {
+      if (this.name == '6') {
       //  首頁
         this.area = 1
-      } else if (this.name === '0' || this.name === 0) {
+      } else if (this.name == '0') {
         // f5
         this.area = 2
-      } else if (this.name === 2 || this.name === '2') {
-
-      } else if (this.name === '3' || this.name === 3) {
-        // 代理
-
-      } else if (this.name === '4' || this.name === 4) {
+      } else if (this.name == '4') {
         // 經銷商
-
+        this.area = 3
+      } else if (this.name == '1') {
+        // 創泓科技
+        this.area = 4
+      } else if (this.name == '3') {
+        // 零壹科技
+        this.area = 6
+      } else if (this.name == '2') {
+        // 逸盈科技
+        this.area = 5
       }
+      
       let msg = ''
       if (Type === 1) {
-        msg = '已到第一頁，再跳到火星了~'
+        msg = '無上一篇'
       } else {
-        msg = '我是有底線的人~'
+        msg = '無下一篇'
       }
       getFlipOver({ flip_type: Type, area: this.area, now_id: this.news_id }, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
         if (res.data.code !== '200') {
           this.$message.error({
             message: '獲取數據失敗！',
             duration: 3000
           })
         } else if (res.data.data === undefined || res.data.data.length <= 0) {
-          this.isShowLoading = false
           this.$message.warning({
             message: msg,
             duration: 3000
           })
           // return false
         } else {
-          this.isShowLoading = false
-
           this.newsRead = res.data.data
           this.news_id = res.data.data.id
           // this.reload()
           const path = this.$router.history.current.path
-          console.log(path)
           this.$router.push({ path, query: { name: this.name, news_id: res.data.data.id } })
-          this._newsFiveNewsRead(this.name, res.data.data.id)
+          // this._newsFiveNewsRead(this.name, res.data.data.id)
           // console.log('66')
         }
       })

@@ -3,8 +3,8 @@
      <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="$router.push('/')">首页</a></el-breadcrumb-item>
-          <el-breadcrumb-item><a href="javascript:;">我的文章</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('/')">首頁</a></el-breadcrumb-item>
+          <el-breadcrumb-item><a @click="$router.push('myPublishedArticles')">我的文章</a></el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -55,13 +55,14 @@
             <h3>文章標題</h3>
             <div class="card">
               <input type="text" placeholder="請填寫您的文章標題..." v-model="form.title" @input="ipt">
-              <span>{{form.title ? form.title.length : 0}}/30</span>
+              <!-- <span>{{form.title ? form.title.length : 0}}/30</span> -->
             </div>
-            <h3>文章標題</h3>
+            <h3>文章內容</h3>
             <div class="text">
-               <quill-editor v-model="form.content"></quill-editor>
+               <!-- <quill-editor v-model="form.content" :options="editorOption" ref="myQuillEditor"></quill-editor> -->
+              <ckeditor v-model="form.content"></ckeditor>
               <!-- <textarea placeholder="請填寫您的文章内容..." v-model="form.content"></textarea> -->
-              <span>0/6000</span>
+              <!-- <span>0/6000</span> -->
             </div>
           </div>
         </div>
@@ -69,8 +70,8 @@
           <p>點擊確定送出後，其他用戶方可看到您的文章</p>
           <div class="btn">
             <span @click="cancel">取消</span>
-            <a href="javascrpt:;" @click="addfrom(1)">儲存草稿</a>
-            <a href="javascrpt:;" class="btn-color" @click="addfrom(2)">確定送出</a>
+            <a @click="addfrom(1)">儲存草稿</a>
+            <a class="btn-color" @click="addfrom(2)">確定送出</a>
           </div>
         </div>
       </div>
@@ -92,11 +93,19 @@
 
 <script>
 import Modal from './../components/Modal'
-import { uploadPicture, systemGetArticleClass, setInsertArticle, setInsertDraft } from './../api/request'
+import ckeditor from "./../components/ckeditor";
+import { uploadPicture, systemGetArticleClass, setInsertArticle, setInsertDraft, getFeaturedArticlesRead, setInsertDrafts, delInsertArticle } from './../api/request'
+// eslint-disable-next-line camelcase
+// import VueQuillEditor, { Quill } from 'vue-quill-editor'
+import ImageResize from 'quill-image-resize-module'
+Quill.register('modules/imageResize', ImageResize)
+// import {quillRedefine} from 'vue-quill-editor-upload'
 export default {
   name: 'published-an-article',
   components: {
-    Modal
+    Modal,
+    quillRedefine,
+    ckeditor
   },
   data () {
     return {
@@ -109,21 +118,129 @@ export default {
         { text: '資訊安全', isChecked: false }
       ],
       isShowModal: false,
-      token: '',
       typeIndex: '',
       form: {
         title: '',
         class_id: '',
-        imgs: []
+        imgs: [],
+        type: 'web',
+        content: ''
       },
-      isShowLoading: false
+      article_id: this.$route.query.article_id,
+      token: window.sessionStorage.getItem('token'),
+      isShowLoading: false,
+      // eslint-disable-next-line camelcase
+      editorOption: {
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+            ['blockquote', 'code-block'],
+            [{'header': 1}, {'header': 2}],               // custom button values
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{'script': 'sub'}, {'script': 'super'}],      // superscript/subscript
+            [{'indent': '-1'}, {'indent': '+1'}],          // outdent/indent
+            [{'direction': 'rtl'}],                         // text direction
+            [{'size': ['small', false, 'large', 'huge']}],  // custom dropdown
+            [{'header': [1, 2, 3, 4, 5, 6, false]}],
+            [{'color': []}, {'background': []}],          // dropdown with defaults from theme
+            [{'font': []}],
+            [{'align': []}],
+            ['image'],
+            ['clean']                                         // remove formatting button
+          ],
+          history: {
+            delay: 1000,
+            maxStack: 50,
+            userOnly: false
+          },
+          imageDrop: true,
+          imageResize: {
+            displayStyles: {
+              backgroundColor: 'black',
+              border: 'none',
+              color: 'white'
+            },
+            modules: [ 'Resize', 'DisplaySize', 'Toolbar' ]
+          }
+        }
+      },
+      upLoadUrl: ''
     }
+  },
+  computed: {
+      editor() {
+        return this.$refs.myQuillEditor.quill;
+    }
+  },
+  created: function() {
+    let that = this;
+    that.upLoadUrl= process.env.VUE_APP_BASEURL + '/System/upload_picture_text';
+    that.editorOption = quillRedefine(
+      {
+        // 图片上传的设置
+        uploadConfig: {
+          action: that.upLoadUrl,  // 必填参数 图片上传地址
+          // 必选参数  res是一个函数，函数接收的response为上传成功时服务器返回的数据
+          // 你必须把返回的数据中所包含的图片地址 return 回去
+          res: (respnse) => {
+            var path = respnse.data.path//这里return你的图片地址即可
+            return this.imgs + path
+          },
+          method:"post",
+          name: 'file'
+        },
+        history: {
+          delay: 1000,
+          maxStack: 50,
+          userOnly: false
+        },
+        imageDrop: true,
+        imageResize: {
+          displayStyles: {
+            backgroundColor: 'black',
+            border: 'none',
+            color: 'white'
+          },
+          modules: [ 'Resize', 'DisplaySize', 'Toolbar' ]
+        }
+      }
+    )
+    that.editorOption.modules['history'] = {
+      delay: 1000,
+      maxStack: 50,
+      userOnly: false
+    }
+    that.editorOption.modules['imageResize'] = {
+      displayStyles: {
+        backgroundColor: 'black',
+        border: 'none',
+        color: 'white'
+      },
+      modules: [ 'Resize', 'DisplaySize', 'Toolbar' ]
+    }
+    // that.editorOption.modules['imageDrop'] = true
+    // this.$set(this.editorOption.modules, imageDrop, true);
   },
   mounted () {
     this.token = window.sessionStorage.getItem('token')
     this._systemGetArticleClass()
+    this._getFeaturedArticlesRead()
   },
   methods: {
+    // 獲取文章信息
+    _getFeaturedArticlesRead () {
+      if (this.article_id) {
+        getFeaturedArticlesRead({ article_id: this.article_id }, { headers: { token: this.token } }).then(res => {
+          if (res.data.code !== '200') {
+            this.$message.error('獲取數據失敗!')
+          } else {
+            this.form = res.data.data
+            this.imageUrl = this.imgs + res.data.data.imgs[0]
+          }
+          this.isShowLoading = false
+        })
+      }
+    },
     _systemGetArticleClass () {
       systemGetArticleClass({ headers: { token: this.token } }).then(res => {
         if (res.data.code === '200') {
@@ -132,30 +249,31 @@ export default {
       })
     },
     ipt () {
-      if (this.form.title.length > 30) {
-        this.$message({
-          message: '您的文章標題过长',
-          type: 'warning'
-        })
-      }
+      // if (this.form.title.length > 30) {
+      //   this.$message({
+      //     message: '您的文章標題过长',
+      //     type: 'warning'
+      //   })
+      // }
     },
     addfrom (type) {
       // console.log(type)
       // eslint-disable-next-line camelcase
-      const { title, class_id, imgs, content } = this.form
+      const { title, class_id, content, imgs } = this.form
       let errMsg = ''
       if (!title) {
         errMsg = '請填寫您的文章標題'
       // eslint-disable-next-line camelcase
       } else if (!class_id) {
         errMsg = '請選擇文章分類'
-      } else if (imgs.length > 1) {
+      } else if (imgs.length < 1) {
         errMsg = '請選擇首頁圖片'
       } else if (!content) {
         errMsg = '請填寫您的文章内容'
-      } else if (title.length > 30) {
-        errMsg = '您的文章標題过长'
       }
+      //  else if (title.length > 30) {
+      //   errMsg = '您的文章標題过长'
+      // }
       if (errMsg) {
         this.$message.error(errMsg)
         return
@@ -166,32 +284,60 @@ export default {
       this.form.imgs.forEach((v, i) => {
         imgsArr[i] = v
       })
-      // console.log(imgsArr)
       var str = JSON.stringify(imgsArr)
-      // console.log(str)
       this.form.imgs = str
       if (type === 1) {
-        // console.log(type)
-        setInsertDraft(this.form, { headers: { token: this.token } }).then(res => {
-          if (res.data.code !== '200') {
-            this.isShowLoading = false
-            this.$message.error(res.data.msg)
-          } else {
-            this.isShowLoading = false
-            this.$message.success(res.data.msg)
-            this.reset()
+        this.form.type = 'web'
+        // article_id存在时，为修改草稿
+        if (this.article_id) {
+          var aa = {
+            title: this.form.title,
+            class_id: this.form.class_id,
+            imgs: this.form.imgs,
+            type: this.form.type,
+            id: this.article_id
           }
-        })
-      } else {
-        setInsertArticle(this.form, { headers: { token: this.token } }).then(res => {
-          if (res.data.code !== '200') {
+          setInsertDrafts(this.form, { headers: { token: this.token } }).then(res => {
+              this.isShowLoading = false
+            if (res.data.code !== '200') {
+              this.$message.error(res.data.msg)
+            } else {
+              this.$message.success(res.data.msg)
+              this.$router.push({path:'/myPublishedArticles'})
+              this.reset()
+            }
+          })
+        // article_id不存在时，为新增草稿
+        } else {
+          setInsertDraft(this.form, { headers: { token: this.token } }).then(res => {
             this.isShowLoading = false
+            if (res.data.code !== '200') {
+              this.$message.error(res.data.msg)
+            } else {
+              this.$message.success(res.data.msg)
+              this.$router.push({path:'/myPublishedArticles'})
+              this.reset()
+            }
+          })
+        }
+      } else {
+        this.form.type = 'web'
+        setInsertArticle(this.form, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
+          if (res.data.code !== '200') {
             this.$message.error(res.data.msg)
             // this.from = {}
             // this.this.imageUrl = ''
           } else {
-            this.isShowLoading = false
             this.$message.success(res.data.msg)
+            // 当ID存在时，发布文章并删除当前草稿
+            if (this.article_id) {
+              var ids = {
+                id: this.article_id
+              }
+              delInsertArticle(ids, { headers: { token: this.token } }).then(res => {})
+            }
+            this.$router.push({path:'/myPublishedArticles'})
             this.reset()
           }
         })
@@ -201,7 +347,8 @@ export default {
       this.form = {
         title: '',
         class_id: '',
-        imgs: []
+        imgs: [],
+        content: ''
       }
       this.imageUrl = ''
       this.typeIndex = ''
@@ -232,10 +379,12 @@ export default {
       }
       this.isShowLoading = true
       uploadPicture(UploadData, config).then(res => {
+          this.isShowLoading = false
         if (res.data.code === '200') {
           this.imageUrl = this.imgs + res.data.data.path
+          this.form.imgs = []
           this.form.imgs.push(res.data.data.path)
-          this.isShowLoading = false
+          // this.form.imgs = res.data.data.path
         }
       })
     },
@@ -258,8 +407,7 @@ export default {
     submit () {
       this.isShowModal = false
       this.canScroll()
-      this.form = {}
-      this.$router.push('/')
+      this.$router.push('/myPublishedArticles')
     }
   }
 }
@@ -417,7 +565,7 @@ export default {
         }
       }
       .text {
-        height:40rem;
+        min-height:40rem;
         padding: 1.4rem 2rem 2rem;
         background:rgba(245,246,247,1);
         border-radius:.6rem;
@@ -434,6 +582,16 @@ export default {
           font-size:1.6rem;
           color:rgba(189,189,189,1);
           margin-bottom: 3.6rem;
+        }
+        textarea {
+          background:rgba(245,246,247,1);
+          width: 100%;
+          height: 100%;
+          border: none;
+          font-size:1.6rem;
+          color:rgba(189,189,189,1);
+          margin-bottom: 3.6rem;
+          resize: none;
         }
         span {
           @include flex(flex-end);
@@ -492,7 +650,11 @@ export default {
         flex: 0 0 100%;
       }
       .item-r {
+        width: 100%;
         margin-left: 0rem;
+        .text {
+          padding: 0;
+        }
       }
       }
       .bottom-content {
@@ -502,11 +664,13 @@ export default {
           margin-top: 2rem;
         }
         .btn {
+          display: flex;
+          justify-content: space-around;
           width: 100%;
           margin-top: 1rem;
           a {
-            width:13rem;
-            height:4rem;
+            width:8rem;
+            height:3rem;
           }
         }
       }

@@ -3,7 +3,21 @@
     <div class="tabs">
       <div class="container">
         <el-breadcrumb separator-class="icon-3">
-          <el-breadcrumb-item><a href="javascript:;" @click="goHome">首页</a></el-breadcrumb-item>
+          <el-breadcrumb-item>
+            <a v-if="this.$route.query.newsId == 6" @click="goNext()">首頁</a>
+            <a v-if="this.$route.query.newsId == 4" @click="goNext()">經銷商專區</a>
+            <a v-if="this.$route.query.newsId == 2 || this.$route.query.newsId == 3 || this.$route.query.newsId == 1">代理商專區</a><!-- @click="goNext()" -->
+            <a v-if="this.$route.query.newsId == 0" @click="goNext()">F5專區</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.newsId == 2">
+            <a @click="goNext()">逸盈科技NETFOS</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.newsId == 3">
+            <a @click="goNext()">零壹科技ZERONE</a>
+          </el-breadcrumb-item>
+          <el-breadcrumb-item v-if="this.$route.query.newsId == 1">
+            <a @click="goNext()">創泓科技Uniforce</a>
+          </el-breadcrumb-item>
           <el-breadcrumb-item :class="{'checked': $route.meta.title}">{{$route.meta.title}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -18,20 +32,20 @@
           <div class="item-text" v-for="(item,index) in newsList" :key="index" @click="goNewsDetails(item.id)">
             <div class="name">
               <h1>{{item.title}}</h1>
-              <span>創建於 {{item.created_at | dateFormat}}</span>
+              <span>創建於 {{item.created_at}}</span>
             </div>
-            <div class="text">{{item.content}}</div>
-            <div class="user">
+            <div class="text" v-html="item.content"></div>
+            <!-- <div class="user">
               <div class="user-img">
                 <div class="img">
                   <img src="./../../../assets/imgs/safety-user.png" alt="">
                 </div>
-                <span>發表人：郭子君</span>
+                <span>發表人：{{ item.id }}</span>
               </div>
               <div class="tip">
                 <i class="icon-6"></i>查看234235
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -91,25 +105,44 @@ export default {
     this._newsFiveNewsList()
   },
   methods: {
-    goHome () {
-      // 首页
+    goNext () {
       if (this.newsId === 6 || this.newsId === '6') {
-        this.$router.push('/')
+        this.$router.push({ path: '/pushInformation' })
       } else if (this.newsId === 0 || this.newsId === '0') {
-        // f5
-        this.$router.push({ path: '/pushInformation', query: { f5: 0 } })
-      } else if (this.newsId === 3 || this.newsId === '3' || this.newsId === 2 || this.newsId === '2') {
-        // 代理
+        this.$router.push({ path: '/pushInformation', query: { f5: this.newsId } })
+      } else if (this.newsId == '1' || this.newsId == '3' || this.newsId == '2') {
         this.$router.push({ path: '/pushInformation', query: { agencyId: this.newsId } })
       } else if (this.newsId === 4 || this.newsId === '4') {
         this.$router.push({ path: '/pushInformation', query: { dealers: this.newsId } })
       }
     },
     _newsFiveNewsList () {
-      const { offset, limit } = this
       // 0 f5  3零壹科技ZERONE(代) 2逸盈科技NETFOS(代) 4經銷商 6首頁
-      if (this.newsId === '0' || this.newsId === 0) {
-        newsFiveNewsList({ offset, limit }, { headers: { token: this.token } }).then(res => {
+      // if (this.newsId === '0' || this.newsId === 0) {
+      //   var form = {
+      //     offset: this.offset * this.limit,
+      //     limit: this.limit
+      //   }
+      //   newsFiveNewsList(form, { headers: { token: this.token } }).then(res => {
+      //     if (res.data.code !== '200') {
+      //       this.$message.error({
+      //         message: '獲取數據失敗！'
+      //       })
+      //     } else {
+      //       this.newsList = res.data.data.rows
+      //       this.total = res.data.data.total
+      //     }
+      //     this.isShowLoading = false
+      //   })
+      // } else
+      if (this.newsId === 3 || this.newsId === '3') {
+        var form1 = {
+          offset: this.offset * this.limit,
+          limit: this.limit,
+          classify: this.newsId
+        }
+        getAgentNewsList(form1, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
@@ -118,35 +151,48 @@ export default {
             this.newsList = res.data.data.rows
             this.total = res.data.data.total
           }
-          this.isShowLoading = false
-        })
-      } else if (this.newsId === 3 || this.newsId === '3') {
-        getAgentNewsList({ offset, limit, classify: this.newsId }, { headers: { token: this.token } }).then(res => {
-          if (res.data.code !== '200') {
-            this.$message.error({
-              message: '獲取數據失敗！'
-            })
-          } else {
-            this.newsList = res.data.data.rows
-            this.total = res.data.data.total
-          }
-          this.isShowLoading = false
         })
       } else if (this.newsId === '2' || this.newsId === 2) {
-        getAgentNewsList({ offset, limit, classify: this.newsId }, { headers: { token: this.token } }).then(res => {
+        var form2 = {
+          offset: this.offset * this.limit,
+          limit: this.limit,
+          classify: this.newsId
+        }
+        getAgentNewsList(form2, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
             })
-            this.isShowLoading = false
           } else {
             this.newsList = res.data.data.rows
             this.total = res.data.data.total
           }
-          this.isShowLoading = false
+        })
+      } else if (this.newsId === '1' || this.newsId === 1) {
+        var form3 = {
+          offset: this.offset * this.limit,
+          limit: this.limit,
+          classify: this.newsId
+        }
+        getAgentNewsList(form3, { headers: { token: this.token } }).then(res => {
+            this.isShowLoading = false
+          if (res.data.code !== '200') {
+            this.$message.error({
+              message: '獲取數據失敗！'
+            })
+          } else {
+            this.newsList = res.data.data.rows
+            this.total = res.data.data.total
+          }
         })
       } else if (this.newsId === '4' || this.newsId === 4) {
-        getDealerNewsList({ offset, limit }, { headers: { token: this.token } }).then(res => {
+        var form4 = {
+          offset: this.offset * this.limit,
+          limit: this.limit
+        }
+        getDealerNewsList(form4, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
@@ -155,12 +201,16 @@ export default {
             this.newsList = res.data.data.rows
             this.total = res.data.data.total
           }
-          this.isShowLoading = false
         })
       } else {
         // console.log(this.newsId, '6' || this.newsId === 6)
-        getHomeNewsList({ offset, limit }, { headers: { token: this.token } }).then(res => {
-          console.log(res)
+        var form5 = {
+          offset: this.offset * this.limit,
+          limit: this.limit,
+          type: 2
+        }
+        getHomeNewsList(form5, { headers: { token: this.token } }).then(res => {
+          this.isShowLoading = false
           if (res.data.code !== '200') {
             this.$message.error({
               message: '獲取數據失敗！'
@@ -169,7 +219,6 @@ export default {
             this.newsList = res.data.data.rows
             this.total = res.data.data.total
           }
-          this.isShowLoading = false
         })
       }
     },
@@ -178,8 +227,10 @@ export default {
       if (e === 1) {
         this.offset = 0
       } else {
-        this.offset = (e - 1) * this.limit
+        // this.offset = (e - 1) * this.limit
+        this.offset = e - 1
       }
+      window,scrollTo(0,0)
       this.isShowLoading = true
       this._newsFiveNewsList()
     },
@@ -279,6 +330,11 @@ export default {
         font-weight:400;
         color:rgba(134,134,134,1);
         line-height:2.5rem;
+        height: 10rem;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
       }
       .user {
         margin-top: 2.7rem;

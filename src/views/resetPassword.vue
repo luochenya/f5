@@ -11,18 +11,17 @@
             <label v-if="$route.query.type ==!1">
               <h3>舊密碼</h3>
               <input type="text" placeholder="請輸入您的舊密碼">
-
             </label>
             <div class="label-tow">
               <label :prop="prop.password">
                 <h3>新密碼</h3>
-                <input type="text" placeholder="密碼必須為長度8至20之英數字組合" v-model="form.password" :class="{'checked': errStatus1}" @blur.prevent="changeIpt('password')">
+                <input type="password" placeholder="密碼長度至少6位數" v-model="form.password" :class="{'checked': errStatus1}" @blur.prevent="changeIpt('password')">
                 <div :class="{'error': errStatus1}"><span></span>{{errMessage1}}</div>
               </label>
             </div>
             <label :prop="prop.repassword">
               <h3>確認新密碼</h3>
-              <input type="password" placeholder="密碼必須為長度8至20之英數字組合" v-model="form.repassword" :class="{'checked': errStatus2}" @blur.prevent="changeIpt('repassword')">
+              <input type="password" placeholder="密碼長度至少6位數" v-model="form.repassword" :class="{'checked': errStatus2}" @blur.prevent="changeIpt('repassword')">
               <div :class="{'error': errStatus2}"><span></span>{{errMessage2}}</div>
             </label>
             <div class="btn" @click="gotoHome">確認</div>
@@ -52,7 +51,7 @@ export default {
       errMessage2: '',
       errStatus2: false,
       rules: {
-        password: [{ required: true, message: '請輸入新密碼' }],
+        password: [{ required: true, message: '請輸入新密碼' }, { min: 6, message: '密碼長度至少6位數' }],
         repassword: [{ required: true, message: '請輸入確認密碼' }]
       },
       token: this.$route.query.id
@@ -67,7 +66,6 @@ export default {
       const { password, repassword } = this.form
       if (password && repassword && !this.errStatus1 && !this.errStatus2) {
         AccountRetrievePassword(this.form, { headers: { token: this.token } }).then(res => {
-          console.log(res.data.code)
           if (res.data.code === '200') {
             this.$router.push('/login')
           }
@@ -106,6 +104,10 @@ export default {
           }
         }
       })
+      if (this.form.password !== this.form.repassword) {
+        this.errMessage2 = '確認密碼與密碼不一致'
+        this.errStatus2 = true
+      }
     }
   }
 }

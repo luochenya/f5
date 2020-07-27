@@ -3,7 +3,7 @@
     <div class="container">
       <div class="password-box">
         <div class="title">
-          <h1>{{$route.query.type ===1 || '1'? '忘記密碼' : '忘記帳號'}}</h1>
+          <h1>{{$route.query.type == '1' ? '忘記密碼' : '忘記帳號'}}</h1>
           <p>請輸入註冊時所填入的E-mail，我們將寄出驗證碼信件給您</p>
         </div>
         <div class="form">
@@ -70,19 +70,16 @@ export default {
             this.isShowModal = true
             this.noScroll()
           }
+        } else {
+          this.$message({
+            message: res.data.msg,
+            type: 'warning'
+          })
         }
       })
     },
     sendVerifyCode () {
-      this.countDown = 60
-      this.timeIntervalID = setInterval(() => {
-        this.countDown--
-        // 4.1 如果减到0 则清除定时器
-        if (this.countDown === 0) {
-          clearInterval(this.timeIntervalID)
-        }
-      }, 1000)
-      AccountSendCode({ receiver: this.receiver }).then(res => {
+      AccountSendCode({ receiver: this.receiver, type: this.$route.query.type }).then(res => {
         if (res.data.code !== '200') {
           this.$message({
             message: res.data.msg,
@@ -93,11 +90,20 @@ export default {
             message: res.data.msg,
             type: 'success'
           })
+          this.countDown = 60
+          this.timeIntervalID = setInterval(() => {
+            this.countDown--
+            // 4.1 如果减到0 则清除定时器
+            if (this.countDown === 0) {
+              clearInterval(this.timeIntervalID)
+            }
+          }, 1000)
         }
       })
     },
     submit () {
       this.isShowModal = false
+      this.$router.push({ path: '/login' })
       this.canScroll()
     }
   }

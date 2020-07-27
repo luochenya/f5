@@ -6,7 +6,7 @@ import './assets/style/index.scss'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import 'swiper/css/swiper.css'
 
-import { Pagination, Breadcrumb, BreadcrumbItem, DatePicker, Select, Option, Upload, Message } from 'element-ui'
+import { Pagination, Breadcrumb, BreadcrumbItem, DatePicker, Select, Option, Upload, Message, Checkbox } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'vue2-animate/dist/vue2-animate.min.css'
 import Schema from 'async-validator'
@@ -15,7 +15,9 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 import Loading from './components/Loading.vue'
-
+// fb登录
+import FBSignInButton from 'vue-facebook-signin-button'
+Vue.use(FBSignInButton);
 Vue.component('Loading', Loading)
 
 Vue.use(VueQuillEditor /* { default global options } */)
@@ -27,6 +29,7 @@ Vue.use(DatePicker)
 Vue.use(Select)
 Vue.use(Option)
 Vue.use(Upload)
+Vue.use(Checkbox)
 Vue.config.productionTip = false
 Vue.prototype.Schema = Schema
 // 彈出框禁止滑動
@@ -43,7 +46,12 @@ Vue.prototype.canScroll = function () {
   document.body.style.overflow = '' // 出現滾動條
   document.removeEventListener('touchmove', mo, false)
 }
-Vue.prototype.imgs = 'http://f5point.twczw.website/'
+// 定义全局变量
+if (process.env.NODE_ENV == "serve") {
+  Vue.prototype.imgs = process.env.VUE_APP_IMGURL;
+} else {
+  Vue.prototype.imgs = window.location.protocol + "//" + window.location.host + "/";
+}
 Vue.prototype.$message = Message
 Vue.filter('dateFormat', function (originVal) {
   const dt = new Date(originVal)
