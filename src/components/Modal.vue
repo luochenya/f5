@@ -1,61 +1,75 @@
 <template>
-   <transition name="slide">
+  <transition name="slide">
     <div class="modal" v-show="showModal">
       <div class="mask"></div>
-      <div class="modal-dialog" v-if="btnType!=8">
+      <div class="modal-dialog" v-if="btnType != 8">
         <div class="modal-header">
           <div class="bgImg" v-if="imgShow">
-            <img src="./../assets/imgs/book.png" alt="">
+            <img src="./../assets/imgs/book.png" alt="" />
           </div>
-          <div class="bgImg-success" v-if="btnType==3">
-            <img src="./../assets/imgs/book-success.png" alt="">
+          <div class="bgImg-success" v-if="btnType == 3">
+            <img src="./../assets/imgs/book-success.png" alt="" />
           </div>
-          <div class="bgImg-f5" v-if="btnType==2">
-            <img src="./../assets/imgs/modal-f5.png" alt="">
+          <div class="bgImg-f5" v-if="btnType == 2">
+            <img src="./../assets/imgs/modal-f5.png" alt="" />
           </div>
-             <div class="bgImg-f5" v-if="btnType==4">
-            <img src="./../assets/imgs/modal-f5.png" alt="">
+          <div class="bgImg-f5" v-if="btnType == 4">
+            <img src="./../assets/imgs/modal-f5.png" alt="" />
           </div>
         </div>
         <div class="modal-body">
           <slot name="body"></slot>
         </div>
-       <div class="modal-footer">
-          <a class="btn" v-if="btnType==1 || btnType==3 || btnType==4" @click="$emit('submit')">{{sureText}}</a>
-          <div class="btn-group" v-if="btnType==2">
-            <a class="btn" @click="$emit('cancel')">{{cancelText}}</a>
-            <a class="btn btn-default" @click="$emit('submit')">{{sureText}}</a>
+        <div class="modal-footer">
+          <a
+            class="btn"
+            v-if="btnType == 1 || btnType == 3 || btnType == 4"
+            @click="$emit('submit')"
+            >{{ sureText }}</a
+          >
+          <div class="btn-group" v-if="btnType == 2">
+            <a class="btn" @click="$emit('cancel')">{{ cancelText }}</a>
+            <a class="btn btn-default" @click="$emit('submit')">{{
+              sureText
+            }}</a>
           </div>
-          <div class="btn-group" v-if="btnType==8">
+          <div class="btn-group" v-if="btnType == 8">
             <a class="btn btn-default" @click="$emit('submit')">我知道了</a>
           </div>
         </div>
       </div>
-      <div class="modal-dialogs" v-if="btnType==8">
+      <div class="modal-dialogs" v-if="btnType == 8">
         <div class="modal-header">
           <div class="bgImg" v-if="imgShow">
-            <img src="./../assets/imgs/book.png" alt="">
+            <img src="./../assets/imgs/book.png" alt="" />
           </div>
-          <div class="bgImg-success" v-if="btnType==3">
-            <img src="./../assets/imgs/book-success.png" alt="">
+          <div class="bgImg-success" v-if="btnType == 3">
+            <img src="./../assets/imgs/book-success.png" alt="" />
           </div>
-          <div class="bgImg-f5" v-if="btnType==2">
-            <img src="./../assets/imgs/modal-f5.png" alt="">
+          <div class="bgImg-f5" v-if="btnType == 2">
+            <img src="./../assets/imgs/modal-f5.png" alt="" />
           </div>
-             <div class="bgImg-f5" v-if="btnType==4">
-            <img src="./../assets/imgs/modal-f5.png" alt="">
+          <div class="bgImg-f5" v-if="btnType == 4">
+            <img src="./../assets/imgs/modal-f5.png" alt="" />
           </div>
         </div>
         <div class="modal-body">
           <slot name="body"></slot>
         </div>
-       <div class="modal-footer">
-          <a class="btn" v-if="btnType==1 || btnType==3 || btnType==4" @click="$emit('submit')">{{sureText}}</a>
-          <div class="btn-group" v-if="btnType==2">
-            <a class="btn" @click="$emit('cancel')">{{cancelText}}</a>
-            <a class="btn btn-default" @click="$emit('submit')">{{sureText}}</a>
+        <div class="modal-footer">
+          <a
+            class="btn"
+            v-if="btnType == 1 || btnType == 3 || btnType == 4"
+            @click="$emit('submit')"
+            >{{ sureText }}</a
+          >
+          <div class="btn-group" v-if="btnType == 2">
+            <a class="btn" @click="$emit('cancel')">{{ cancelText }}</a>
+            <a class="btn btn-default" @click="$emit('submit')">{{
+              sureText
+            }}</a>
           </div>
-          <div class="btn-group" v-if="btnType==8">
+          <div class="btn-group" v-if="btnType == 8">
             <a class="btn btn-default" @click="$emit('submit')">我知道了</a>
           </div>
         </div>
@@ -66,12 +80,12 @@
 
 <script>
 export default {
-  name: 'modal',
+  name: "modal",
   props: {
     // 弹窗类型: 小small, 中middle, 大large, 表单form
     modalType: {
       type: String,
-      default: 'small'
+      default: "small"
     },
     // 弹窗标题
     title: String,
@@ -79,28 +93,28 @@ export default {
     btnType: String,
     sureText: {
       type: String,
-      default: '確認'
+      default: "確認"
     },
     cancelText: {
       type: String,
-      default: '取消'
+      default: "取消"
     },
     showModal: Boolean,
     imgShow: Boolean
   }
-}
+};
 </script>
 
-<style lang='scss'>
-@import './../assets/style/mixin.scss';
+<style lang="scss">
+@import "./../assets/style/mixin.scss";
 .modal {
   @include position(fixed);
   z-index: 10;
-  transition: all .5s;
+  transition: all 0.5s;
   .mask {
     @include position(fixed);
-    background:rgba(0,0,0,1);
-    opacity: .5;
+    background: rgba(0, 0, 0, 1);
+    opacity: 0.5;
   }
   &.slide-enter-active {
     top: 0;
@@ -112,11 +126,11 @@ export default {
     top: -100%;
   }
   .modal-dialogs {
-    @include position(absolute,40%,50%,50rem,32rem);
-    transform: translate(-50%,-50%);
-    background:rgba(255,255,255,1);
-    border-radius:.6rem;
-    @include flex(flex-start,center);
+    @include position(absolute, 40%, 50%, 50rem, 32rem);
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 1);
+    border-radius: 0.6rem;
+    @include flex(flex-start, center);
     flex-direction: column;
     padding: 3.8rem 5rem 4.2rem;
     box-sizing: border-box;
@@ -140,65 +154,75 @@ export default {
     }
     .modal-body {
       text-align: center;
-      h3,h2 {
-        font-size:1.6rem;
-        font-weight:600;
-        color:rgba(37,36,39,1);
-        line-height:2.2rem;
+      h3,
+      h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: rgba(37, 36, 39, 1);
+        line-height: 2.2rem;
       }
       h3 {
-         margin-top: 1.9rem;
+        margin-top: 1.9rem;
       }
       em {
         margin-top: 2rem;
-        font-weight:lighter;
+        font-weight: lighter;
         text-align: left;
         display: block;
-        font-size:13px;
-        color:rgba(37,36,39,1);
-        line-height:26px;
+        font-size: 13px;
+        color: rgba(37, 36, 39, 1);
+        line-height: 26px;
+        white-space: pre-line;
       }
     }
     .modal-footer {
-      .btn{
+      .btn {
         @include flex(center);
-        width:25rem;
-        height:4.6rem;
+        width: 25rem;
+        height: 4.6rem;
         margin-top: 3.6rem;
-        background:linear-gradient(225deg,rgba(42,42,44,1) 0%,rgba(37,36,39,1) 100%);
-        box-shadow:0 1rem 3rem 0 rgba(41,41,44,0.1);
-        border-radius:.4rem;
-        font-size:1.6rem;
-        font-weight:400;
-        color:rgba(255,255,255,1);
+        background: linear-gradient(
+          225deg,
+          rgba(42, 42, 44, 1) 0%,
+          rgba(37, 36, 39, 1) 100%
+        );
+        box-shadow: 0 1rem 3rem 0 rgba(41, 41, 44, 0.1);
+        border-radius: 0.4rem;
+        font-size: 1.6rem;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 1);
       }
       .btn-group {
         padding-top: 1rem;
         @include flex(center);
         .btn {
-          width:16rem;
-          height:5rem;
-          background:rgba(255,255,255,1);
-          border-radius:.6rem;
-          border:.1rem solid rgba(61,61,61,1);
-          font-size:1.4rem;
-          font-weight:400;
-          color:rgba(37,36,39,1);
+          width: 16rem;
+          height: 5rem;
+          background: rgba(255, 255, 255, 1);
+          border-radius: 0.6rem;
+          border: 0.1rem solid rgba(61, 61, 61, 1);
+          font-size: 1.4rem;
+          font-weight: 400;
+          color: rgba(37, 36, 39, 1);
         }
         .btn-default {
           margin-left: 2rem;
-          color:rgba(255,255,255,1);
-          background:linear-gradient(225deg,rgba(42,42,44,1) 0%,rgba(37,36,39,1) 100%);
+          color: rgba(255, 255, 255, 1);
+          background: linear-gradient(
+            225deg,
+            rgba(42, 42, 44, 1) 0%,
+            rgba(37, 36, 39, 1) 100%
+          );
         }
       }
     }
   }
   .modal-dialog {
-    @include position(absolute,40%,50%,40rem,32rem);
-    transform: translate(-50%,-50%);
-    background:rgba(255,255,255,1);
-    border-radius:.6rem;
-    @include flex(flex-start,center);
+    @include position(absolute, 40%, 50%, 40rem, 32rem);
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 1);
+    border-radius: 0.6rem;
+    @include flex(flex-start, center);
     flex-direction: column;
     padding: 3.8rem 0 4.2rem 0;
     box-sizing: border-box;
@@ -222,93 +246,103 @@ export default {
     }
     .modal-body {
       text-align: center;
-      h3,h2 {
-        font-size:1.6rem;
-        font-weight:600;
-        color:rgba(37,36,39,1);
-        line-height:2.2rem;
+      h3,
+      h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: rgba(37, 36, 39, 1);
+        line-height: 2.2rem;
       }
       h3 {
-         margin-top: 1.9rem;
+        margin-top: 1.9rem;
       }
-      p,span {
-        font-size:1.2rem;
-        font-weight:400;
-        color:rgba(189,189,189,1);
-        line-height:1.7rem;
+      p,
+      span {
+        font-size: 1.2rem;
+        font-weight: 400;
+        color: rgba(189, 189, 189, 1);
+        line-height: 1.7rem;
       }
       em {
         width: 80%;
         margin: 0 auto;
         text-align: left;
         display: block;
-        font-size:13px;
-        color:rgba(37,36,39,1);
-        line-height:26px;
+        font-size: 13px;
+        color: rgba(37, 36, 39, 1);
+        line-height: 26px;
       }
-      p,h2 {
-        margin-top: .4rem;
+      p,
+      h2 {
+        margin-top: 0.4rem;
       }
       span {
-       padding-top: 3rem;
-       display: block;
+        padding-top: 3rem;
+        display: block;
       }
-
     }
     .modal-footer {
-      .btn{
+      .btn {
         @include flex(center);
-        width:25rem;
-        height:4.6rem;
+        width: 25rem;
+        height: 4.6rem;
         margin-top: 3.6rem;
-        background:linear-gradient(225deg,rgba(42,42,44,1) 0%,rgba(37,36,39,1) 100%);
-        box-shadow:0 1rem 3rem 0 rgba(41,41,44,0.1);
-        border-radius:.4rem;
-        font-size:1.6rem;
-        font-weight:400;
-        color:rgba(255,255,255,1);
+        background: linear-gradient(
+          225deg,
+          rgba(42, 42, 44, 1) 0%,
+          rgba(37, 36, 39, 1) 100%
+        );
+        box-shadow: 0 1rem 3rem 0 rgba(41, 41, 44, 0.1);
+        border-radius: 0.4rem;
+        font-size: 1.6rem;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 1);
       }
       .btn-group {
         padding-top: 1rem;
         @include flex(center);
         .btn {
-          width:16rem;
-          height:5rem;
-          background:rgba(255,255,255,1);
-          border-radius:.6rem;
-          border:.1rem solid rgba(61,61,61,1);
-          font-size:1.4rem;
-          font-weight:400;
-          color:rgba(37,36,39,1);
+          width: 16rem;
+          height: 5rem;
+          background: rgba(255, 255, 255, 1);
+          border-radius: 0.6rem;
+          border: 0.1rem solid rgba(61, 61, 61, 1);
+          font-size: 1.4rem;
+          font-weight: 400;
+          color: rgba(37, 36, 39, 1);
         }
         .btn-default {
           margin-left: 2rem;
-          color:rgba(255,255,255,1);
-          background:linear-gradient(225deg,rgba(42,42,44,1) 0%,rgba(37,36,39,1) 100%);
+          color: rgba(255, 255, 255, 1);
+          background: linear-gradient(
+            225deg,
+            rgba(42, 42, 44, 1) 0%,
+            rgba(37, 36, 39, 1) 100%
+          );
         }
       }
     }
   }
-  @media screen and (max-width: 430px){
+  @media screen and (max-width: 430px) {
     .modal-dialog {
-      @include position(absolute,40%,50%,97%,32rem);
+      @include position(absolute, 40%, 50%, 97%, 32rem);
       .modal-footer {
         .btn-group {
           @include flex(center);
           .btn {
-            width:15rem;
+            width: 15rem;
           }
         }
       }
     }
     .modal-dialogs {
-      @include position(absolute,50%,50%,97%,32rem);
+      @include position(absolute, 50%, 50%, 97%, 32rem);
       padding: 2rem 1rem;
       .modal-footer {
         .btn-group {
           @include flex(center);
           .btn {
-            width:15rem;
+            width: 15rem;
           }
         }
       }

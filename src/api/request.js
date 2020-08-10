@@ -1,4 +1,7 @@
-import { post, posts } from './http'
+import {
+  post,
+  posts
+} from './http'
 
 // 註冊
 export const AccountRegister = p => post('/Account/register', p)
@@ -136,6 +139,8 @@ export const getPointApplyList = (p, h) => post('Order/get_point_apply_list', p,
 export const getPointsApplyClassList = h => post('Order/get_points_apply_class_list', {}, h)
 // 新增點數申請
 export const insertPointApply = (p, h) => post('Order/insert_point_apply', p, h)
+// 新增點數申請说明
+export const getPointsApplyExplain = h => post('Order/get_points_apply_explain', {}, h)
 // 獲取點數申請詳情
 export const getPointApplyRead = (p, h) => post('Order/get_point_apply_read', p, h)
 // 獲取點數記錄列表

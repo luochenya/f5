@@ -5,7 +5,9 @@ import axios from 'axios'
 import QS from 'qs'
 import router from '@/router'
 // import store from '../store/index'
-import { Message } from 'element-ui'
+import {
+  Message
+} from 'element-ui'
 
 // 环境的切换
 /* if (process.env.NODE_ENV === 'development') {
@@ -21,7 +23,7 @@ if (process.env.NODE_ENV === 'serve') {
 } else if (process.env.NODE_ENV === 'build') {
   axios.defaults.baseURL = window.location.protocol + "//" + window.location.host + "/api"
 } else {
-  axios.defaults.baseURL = window.location.protocol + "//" + window.location.host
+  axios.defaults.baseURL = window.location.protocol + "//" + window.location.host + "/api"
 }
 
 // 請求超时时间
@@ -57,7 +59,9 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 axios.interceptors.response.use(
   response => {
     if (response.data.code == "202") {
-      router.replace({ name: 'login' })
+      router.replace({
+        name: 'login'
+      })
     }
     return response;
   },
@@ -140,11 +144,11 @@ axios.interceptors.response.use(
  * @param {String} url [請求的url地址]
  * @param {Object} params [請求时携带的参数]
  */
-export function get (url, params) {
+export function get(url, params) {
   return new Promise((resolve, reject) => {
     axios.get(url, {
-      params: params
-    })
+        params: params
+      })
       .then(res => {
         resolve(res)
       })
@@ -158,7 +162,7 @@ export function get (url, params) {
  * @param {String} url [請求的url地址]
  * @param {Object} params [請求时携带的参数]
  */
-export function post (url, params, headers) {
+export function post(url, params, headers) {
   return new Promise((resolve, reject) => {
     axios.post(url, QS.stringify(params), headers)
       .then(res => {
@@ -170,7 +174,7 @@ export function post (url, params, headers) {
   })
 }
 
-export function posts (url, params, headers) {
+export function posts(url, params, headers) {
   return new Promise((resolve, reject) => {
     axios.post(url, params, headers)
       .then(res => {
@@ -187,7 +191,7 @@ export function posts (url, params, headers) {
  * @param {String} url [請求的url地址]
  * @param {Object} params [請求时携带的参数]
  */
-export function put (url, params) {
+export function put(url, params) {
   return new Promise((resolve, reject) => {
     axios.put(url, params)
       .then(res => {
@@ -204,7 +208,7 @@ export function put (url, params) {
  * @param {String} url [請求的url地址]
  * @param {Object} params [請求时携带的参数]
  */
-export function Delete (url, params) {
+export function Delete(url, params) {
   return new Promise((resolve, reject) => {
     axios.delete(url, params)
       .then(res => {
